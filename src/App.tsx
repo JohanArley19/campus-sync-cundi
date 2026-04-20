@@ -10,9 +10,9 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
-import AcceptInvite from "./pages/AcceptInvite";
 import Landing from "./pages/Landing";
-import Analytics from "./pages/Analytics";
+import Subjects from "./pages/Subjects";
+import Activities from "./pages/Activities";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,7 +30,6 @@ const App = () => (
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/invite/:token" element={<AcceptInvite />} />
             <Route
               path="/app"
               element={
@@ -40,10 +39,18 @@ const App = () => (
               }
             />
             <Route
-              path="/app/analytics"
+              path="/app/materias"
               element={
                 <ProtectedRoute>
-                  <Analytics />
+                  <Subjects />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/app/actividades"
+              element={
+                <ProtectedRoute>
+                  <Activities />
                 </ProtectedRoute>
               }
             />
