@@ -1,0 +1,122 @@
+@import url('https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Atelier Kanso — Emerald / Cream light theme */
+    --background: 60 20% 97.5%;
+    --foreground: 0 0% 9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 9%;
+
+    --primary: 160 84% 24%;
+    --primary-foreground: 60 20% 97.5%;
+
+    --secondary: 60 20% 91%;
+    --secondary-foreground: 0 0% 9%;
+
+    --muted: 60 15% 93%;
+    --muted-foreground: 0 0% 40%;
+
+    --accent: 160 84% 24%;
+    --accent-foreground: 60 20% 97.5%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 60 20% 97.5%;
+
+    --border: 60 15% 87%;
+    --input: 60 15% 87%;
+    --ring: 0 0% 65%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 9%;
+    --sidebar-primary: 0 0% 9%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 60 15% 93%;
+    --sidebar-accent-foreground: 0 0% 9%;
+    --sidebar-border: 60 15% 90%;
+    --sidebar-ring: 160 84% 24%;
+
+    /* Semantic canvas tokens */
+    --canvas-bg: 60 20% 97.5%;
+    --canvas-grid: 60 20% 87%;
+    --canvas-item-planned: 210 20% 70%;
+    --canvas-item-progress: 160 70% 30%;
+    --canvas-item-complete: 160 84% 18%;
+    --canvas-selection: 160 84% 24%;
+
+    /* Font families */
+    --font-display: 'Figtree', sans-serif;
+    --font-body: 'Figtree', sans-serif;
+  }
+
+  .dark {
+    --background: 160 50% 6%;
+    --foreground: 60 15% 88%;
+
+    --card: 160 40% 10%;
+    --card-foreground: 60 15% 88%;
+
+    --popover: 160 40% 10%;
+    --popover-foreground: 60 15% 88%;
+
+    --primary: 160 84% 32%;
+    --primary-foreground: 160 50% 6%;
+
+    --secondary: 160 30% 15%;
+    --secondary-foreground: 60 15% 88%;
+
+    --muted: 160 25% 14%;
+    --muted-foreground: 60 10% 55%;
+
+    --accent: 160 84% 32%;
+    --accent-foreground: 160 50% 6%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 60 15% 88%;
+
+    --border: 160 25% 18%;
+    --input: 160 25% 18%;
+    --ring: 0 0% 45%;
+
+    --sidebar-background: 160 50% 4%;
+    --sidebar-foreground: 60 15% 75%;
+    --sidebar-primary: 160 84% 32%;
+    --sidebar-primary-foreground: 160 50% 6%;
+    --sidebar-accent: 160 40% 10%;
+    --sidebar-accent-foreground: 60 15% 88%;
+    --sidebar-border: 160 25% 12%;
+    --sidebar-ring: 160 84% 32%;
+
+    --canvas-bg: 160 50% 5%;
+    --canvas-grid: 160 25% 18%;
+    --canvas-item-planned: 210 15% 40%;
+    --canvas-item-progress: 160 60% 26%;
+    --canvas-item-complete: 160 50% 18%;
+    --canvas-selection: 160 84% 32%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+  }
+}
