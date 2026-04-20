@@ -18,10 +18,11 @@ import {
 } from "@/hooks/useActivities";
 import { useSubjects } from "@/hooks/useSubjects";
 import { STATUS_LABELS, PRIORITY_LABELS, formatDate, daysUntil } from "@/lib/academic";
-import { Plus, ListChecks, Pencil, Trash2, Sparkles, Loader2, AlertCircle, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { Plus, ListChecks, Pencil, Trash2, Sparkles, Loader2, AlertCircle, CheckCircle2, XCircle, Clock, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import SEOHead from "@/components/SEOHead";
+import { BatchAnalyzeDialog } from "@/components/activities/BatchAnalyzeDialog";
 
 const STATUS_OPTIONS: ActivityStatus[] = ["pendiente", "realizada", "no_realizada"];
 const PRIORITY_OPTIONS: ActivityPriority[] = ["alta", "media", "baja"];
@@ -52,6 +53,7 @@ export default function Activities() {
   const [editing, setEditing] = useState<Activity | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Activity | null>(null);
   const [analyzingId, setAnalyzingId] = useState<string | null>(null);
+  const [batchOpen, setBatchOpen] = useState(false);
 
   // form state
   const [title, setTitle] = useState("");
@@ -211,13 +213,32 @@ export default function Activities() {
       title="Actividades"
       subtitle="Tus tareas, parciales y trabajos"
       actions={
-        <Button size="sm" onClick={openNew} className="font-body shadow-sm">
-          <Plus className="h-4 w-4 mr-1" />
-          Nueva actividad
-        </Button>
+        <div className="flex items-center gap-2">
+          {activities.some((a) => a.status === "pendiente") && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setBatchOpen(true)}
+              className="font-body"
+              title="La IA analiza todas las pendientes"
+            >
+              <Wand2 className="h-4 w-4 mr-1 text-accent" />
+              Analizar con IA
+            </Button>
+          )}
+          <Button size="sm" onClick={openNew} className="font-body shadow-sm">
+            <Plus className="h-4 w-4 mr-1" />
+            Nueva actividad
+          </Button>
+        </div>
       }
     >
       <SEOHead title="Actividades — CampusSync" />
+      <BatchAnalyzeDialog
+        open={batchOpen}
+        onOpenChange={setBatchOpen}
+        activities={activities}
+      />
 
       <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-4 animate-fade-in">
         {subjects.length === 0 ? (

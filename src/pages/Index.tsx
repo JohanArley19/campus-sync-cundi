@@ -7,6 +7,7 @@ import { useActivities } from "@/hooks/useActivities";
 import { useSubjects } from "@/hooks/useSubjects";
 import { completionRate, daysUntil, STATUS_LABELS, PRIORITY_LABELS } from "@/lib/academic";
 import { BookOpen, ListChecks, AlertTriangle, CheckCircle2, ArrowRight, Sparkles } from "lucide-react";
+import { AIInsightsCard } from "@/components/dashboard/AIInsightsCard";
 import {
   PieChart,
   Pie,
@@ -119,6 +120,9 @@ export default function Index() {
                 tone="accent"
               />
             </div>
+
+            {/* AI Insights */}
+            <AIInsightsCard />
 
             {/* Charts */}
             <div className="grid gap-4 lg:grid-cols-2">
