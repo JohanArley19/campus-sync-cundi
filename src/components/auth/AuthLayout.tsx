@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Route } from "lucide-react";
+import { GraduationCap } from "lucide-react";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -7,12 +7,17 @@ interface AuthLayoutProps {
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[hsl(60,20%,95.5%)] px-4">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-secondary px-4 py-10">
       <Link to="/" className="flex items-center justify-center gap-2 mb-6">
-        <Route className="h-7 w-7 text-foreground" />
-        <span className="font-display text-xl font-bold text-foreground">Roadmapper</span>
+        <div className="h-10 w-10 rounded-lg gradient-hero flex items-center justify-center shadow-emerald">
+          <GraduationCap className="h-6 w-6 text-primary-foreground" />
+        </div>
+        <div className="flex flex-col">
+          <span className="font-display text-lg font-bold text-foreground leading-tight">Sistema Académico</span>
+          <span className="font-body text-[11px] text-muted-foreground leading-tight">Universidad de Cundinamarca</span>
+        </div>
       </Link>
-      <div className="w-full max-w-sm rounded-xl border border-border/60 bg-white shadow-lg shadow-black/8 p-8 space-y-8">
+      <div className="w-full max-w-sm rounded-xl border border-border bg-card shadow-md p-8 space-y-6 animate-fade-in">
         {children}
       </div>
     </div>

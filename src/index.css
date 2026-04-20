@@ -1,108 +1,126 @@
-@import url('https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700;900&family=Source+Sans+3:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/*
+  Sistema Académico — Universidad de Cundinamarca
+  Paleta institucional:
+  - Verde Pantone 3536 C  ≈ hsl(150 56% 30%)
+  - Dorado institucional   ≈ hsl(43 74% 49%)
+  - Blanco / Negro
+*/
+
 @layer base {
   :root {
-    /* Atelier Kanso — Emerald / Cream light theme */
-    --background: 60 20% 97.5%;
-    --foreground: 0 0% 9%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 8%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 9%;
+    --card-foreground: 0 0% 8%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
+    --popover-foreground: 0 0% 8%;
 
-    --primary: 160 84% 24%;
-    --primary-foreground: 60 20% 97.5%;
+    /* Verde institucional */
+    --primary: 150 56% 30%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 150 56% 38%;
+    --primary-soft: 150 40% 95%;
 
-    --secondary: 60 20% 91%;
-    --secondary-foreground: 0 0% 9%;
+    /* Dorado institucional */
+    --accent: 43 74% 49%;
+    --accent-foreground: 0 0% 8%;
+    --accent-soft: 43 80% 95%;
 
-    --muted: 60 15% 93%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 8%;
+
+    --muted: 0 0% 96%;
     --muted-foreground: 0 0% 40%;
 
-    --accent: 160 84% 24%;
-    --accent-foreground: 60 20% 97.5%;
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 100%;
 
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 60 20% 97.5%;
+    --success: 150 56% 30%;
+    --success-foreground: 0 0% 100%;
 
-    --border: 60 15% 87%;
-    --input: 60 15% 87%;
-    --ring: 0 0% 65%;
+    --warning: 43 74% 49%;
+    --warning-foreground: 0 0% 8%;
 
-    --radius: 0.75rem;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 150 56% 30%;
 
+    --radius: 0.625rem;
+
+    /* Status colors for activities */
+    --status-pendiente: 43 74% 49%;
+    --status-realizada: 150 56% 30%;
+    --status-no-realizada: 0 0% 50%;
+
+    /* Priority colors */
+    --priority-alta: 0 72% 45%;
+    --priority-media: 43 74% 49%;
+    --priority-baja: 150 30% 50%;
+
+    /* Sidebar */
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 0 0% 9%;
-    --sidebar-primary: 0 0% 9%;
+    --sidebar-foreground: 0 0% 20%;
+    --sidebar-primary: 150 56% 30%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 60 15% 93%;
-    --sidebar-accent-foreground: 0 0% 9%;
-    --sidebar-border: 60 15% 90%;
-    --sidebar-ring: 160 84% 24%;
+    --sidebar-accent: 150 40% 95%;
+    --sidebar-accent-foreground: 150 56% 22%;
+    --sidebar-border: 0 0% 92%;
+    --sidebar-ring: 150 56% 30%;
 
-    /* Semantic canvas tokens */
-    --canvas-bg: 60 20% 97.5%;
-    --canvas-grid: 60 20% 87%;
-    --canvas-item-planned: 210 20% 70%;
-    --canvas-item-progress: 160 70% 30%;
-    --canvas-item-complete: 160 84% 18%;
-    --canvas-selection: 160 84% 24%;
+    /* Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(150 56% 30%) 0%, hsl(150 56% 22%) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(43 74% 49%) 0%, hsl(43 80% 42%) 100%);
 
-    /* Font families */
-    --font-display: 'Figtree', sans-serif;
-    --font-body: 'Figtree', sans-serif;
+    /* Shadows */
+    --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.05);
+    --shadow-md: 0 4px 12px hsl(150 30% 15% / 0.08);
+    --shadow-lg: 0 10px 30px hsl(150 30% 15% / 0.12);
+    --shadow-emerald: 0 8px 24px hsl(150 56% 30% / 0.20);
+
+    /* Fonts */
+    --font-display: 'Merriweather', Georgia, serif;
+    --font-body: 'Source Sans 3', system-ui, sans-serif;
   }
 
   .dark {
-    --background: 160 50% 6%;
-    --foreground: 60 15% 88%;
-
-    --card: 160 40% 10%;
-    --card-foreground: 60 15% 88%;
-
-    --popover: 160 40% 10%;
-    --popover-foreground: 60 15% 88%;
-
-    --primary: 160 84% 32%;
-    --primary-foreground: 160 50% 6%;
-
-    --secondary: 160 30% 15%;
-    --secondary-foreground: 60 15% 88%;
-
-    --muted: 160 25% 14%;
-    --muted-foreground: 60 10% 55%;
-
-    --accent: 160 84% 32%;
-    --accent-foreground: 160 50% 6%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 60 15% 88%;
-
-    --border: 160 25% 18%;
-    --input: 160 25% 18%;
-    --ring: 0 0% 45%;
-
-    --sidebar-background: 160 50% 4%;
-    --sidebar-foreground: 60 15% 75%;
-    --sidebar-primary: 160 84% 32%;
-    --sidebar-primary-foreground: 160 50% 6%;
-    --sidebar-accent: 160 40% 10%;
-    --sidebar-accent-foreground: 60 15% 88%;
-    --sidebar-border: 160 25% 12%;
-    --sidebar-ring: 160 84% 32%;
-
-    --canvas-bg: 160 50% 5%;
-    --canvas-grid: 160 25% 18%;
-    --canvas-item-planned: 210 15% 40%;
-    --canvas-item-progress: 160 60% 26%;
-    --canvas-item-complete: 160 50% 18%;
-    --canvas-selection: 160 84% 32%;
+    --background: 150 30% 6%;
+    --foreground: 0 0% 95%;
+    --card: 150 25% 9%;
+    --card-foreground: 0 0% 95%;
+    --popover: 150 25% 9%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 150 56% 42%;
+    --primary-foreground: 0 0% 8%;
+    --primary-glow: 150 56% 50%;
+    --primary-soft: 150 30% 15%;
+    --accent: 43 74% 55%;
+    --accent-foreground: 0 0% 8%;
+    --accent-soft: 43 30% 15%;
+    --secondary: 150 20% 14%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 150 20% 14%;
+    --muted-foreground: 0 0% 60%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 95%;
+    --border: 150 20% 18%;
+    --input: 150 20% 18%;
+    --ring: 150 56% 42%;
+    --sidebar-background: 150 30% 5%;
+    --sidebar-foreground: 0 0% 80%;
+    --sidebar-primary: 150 56% 42%;
+    --sidebar-primary-foreground: 0 0% 8%;
+    --sidebar-accent: 150 25% 12%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 150 20% 14%;
+    --sidebar-ring: 150 56% 42%;
   }
 }
 
@@ -110,13 +128,28 @@
   * {
     @apply border-border;
   }
-
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
     font-family: var(--font-body);
+    font-feature-settings: "ss01", "cv11";
   }
-
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+}
+
+@layer utilities {
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+  .gradient-gold {
+    background: var(--gradient-gold);
+  }
+  .shadow-emerald {
+    box-shadow: var(--shadow-emerald);
+  }
+  .text-balance {
+    text-wrap: balance;
   }
 }
