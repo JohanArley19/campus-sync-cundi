@@ -85,7 +85,7 @@ export default function Index() {
 
   return (
     <AppShell title="Dashboard" subtitle="Resumen de tu actividad académica">
-      <SEOHead title="Dashboard — Sistema Académico" description="Visualiza tus métricas académicas." />
+      <SEOHead title="Dashboard — CampusSync" description="Visualiza tus métricas académicas en CampusSync." />
 
       <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6 animate-fade-in">
         {isEmpty ? (

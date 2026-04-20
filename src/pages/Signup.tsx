@@ -37,7 +37,7 @@ export default function Signup() {
 
   return (
     <AuthLayout>
-      <SEOHead title="Crear cuenta — Sistema Académico" />
+      <SEOHead title="Crear cuenta — CampusSync" />
       <div className="text-center space-y-1.5">
         <h1 className="font-display text-2xl font-bold text-foreground">Crea tu cuenta</h1>
         <p className="font-body text-sm text-muted-foreground">Empieza a organizar tu semestre en minutos</p>

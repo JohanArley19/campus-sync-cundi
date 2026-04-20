@@ -217,7 +217,7 @@ export default function Activities() {
         </Button>
       }
     >
-      <SEOHead title="Actividades — Sistema Académico" />
+      <SEOHead title="Actividades — CampusSync" />
 
       <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-4 animate-fade-in">
         {subjects.length === 0 ? (

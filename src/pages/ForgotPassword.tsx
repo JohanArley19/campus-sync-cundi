@@ -30,7 +30,7 @@ export default function ForgotPassword() {
 
   return (
     <AuthLayout>
-      <SEOHead title="Recuperar contraseña — Sistema Académico" />
+      <SEOHead title="Recuperar contraseña — CampusSync" />
       <div className="text-center space-y-1.5">
         <h1 className="font-display text-2xl font-bold text-foreground">Recuperar contraseña</h1>
         <p className="font-body text-sm text-muted-foreground">

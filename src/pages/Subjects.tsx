@@ -107,7 +107,7 @@ export default function Subjects() {
         </Button>
       }
     >
-      <SEOHead title="Materias — Sistema Académico" />
+      <SEOHead title="Materias — CampusSync" />
 
       <div className="p-4 sm:p-6 max-w-6xl mx-auto animate-fade-in">
         {isLoading ? (
