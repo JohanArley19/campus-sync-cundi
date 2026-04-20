@@ -39,7 +39,7 @@ export default function ResetPassword() {
 
   return (
     <AuthLayout>
-      <SEOHead title="Restablecer contraseña — Sistema Académico" />
+      <SEOHead title="Restablecer contraseña — CampusSync" />
       <div className="text-center space-y-1.5">
         <h1 className="font-display text-2xl font-bold text-foreground">Nueva contraseña</h1>
         <p className="font-body text-sm text-muted-foreground">Define la contraseña que usarás de ahora en adelante.</p>

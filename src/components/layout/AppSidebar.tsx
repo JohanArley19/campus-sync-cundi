@@ -38,7 +38,7 @@ export function AppSidebar() {
           {!collapsed && (
             <div className="flex flex-col min-w-0">
               <span className="font-display text-sm font-bold text-foreground leading-tight truncate">
-                Sistema Académico
+                CampusSync
               </span>
               <span className="font-body text-[10px] text-muted-foreground leading-tight truncate">
                 U. Cundinamarca

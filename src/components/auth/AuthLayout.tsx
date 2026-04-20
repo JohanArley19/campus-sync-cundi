@@ -13,7 +13,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           <GraduationCap className="h-6 w-6 text-primary-foreground" />
         </div>
         <div className="flex flex-col">
-          <span className="font-display text-lg font-bold text-foreground leading-tight">Sistema Académico</span>
+          <span className="font-display text-lg font-bold text-foreground leading-tight">CampusSync</span>
           <span className="font-body text-[11px] text-muted-foreground leading-tight">Universidad de Cundinamarca</span>
         </div>
       </Link>

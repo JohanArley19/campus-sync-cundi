@@ -34,7 +34,7 @@ export default function Login() {
 
   return (
     <AuthLayout>
-      <SEOHead title="Iniciar sesión — Sistema Académico" />
+      <SEOHead title="Iniciar sesión — CampusSync" />
       <div className="text-center space-y-1.5">
         <h1 className="font-display text-2xl font-bold text-foreground">Bienvenido de vuelta</h1>
         <p className="font-body text-sm text-muted-foreground">Ingresa para continuar con tu semestre</p>

@@ -13,7 +13,7 @@ export default function NotFound() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-secondary px-4 text-center">
-      <SEOHead title="Página no encontrada — Sistema Académico" />
+      <SEOHead title="Página no encontrada — CampusSync" />
       <div className="h-12 w-12 rounded-lg gradient-hero flex items-center justify-center shadow-emerald mb-6">
         <GraduationCap className="h-7 w-7 text-primary-foreground" />
       </div>

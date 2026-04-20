@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 
 const DEFAULTS = {
-  title: "Sistema Académico — Universidad de Cundinamarca",
+  title: "CampusSync — Universidad de Cundinamarca",
   description:
-    "Sistema web inteligente para la gestión y priorización de actividades académicas con apoyo de inteligencia artificial.",
+    "CampusSync: sistema web inteligente para la gestión y priorización de actividades académicas con apoyo de inteligencia artificial.",
   url: typeof window !== "undefined" ? window.location.origin : "",
   type: "website",
 };

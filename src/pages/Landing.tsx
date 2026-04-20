@@ -57,8 +57,8 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Sistema Académico — Universidad de Cundinamarca"
-        description="Sistema web inteligente para la gestión y priorización de actividades académicas. Optimiza tu tiempo, reduce la procrastinación y mejora tu rendimiento."
+        title="CampusSync — Universidad de Cundinamarca"
+        description="CampusSync: sistema web inteligente para la gestión y priorización de actividades académicas. Optimiza tu tiempo, reduce la procrastinación y mejora tu rendimiento."
       />
 
       {/* Nav */}
@@ -69,7 +69,7 @@ export default function Landing() {
               <GraduationCap className="h-5 w-5 text-primary-foreground" />
             </div>
             <div className="flex flex-col leading-none">
-              <span className="font-display text-sm font-bold text-foreground">Sistema Académico</span>
+              <span className="font-display text-sm font-bold text-foreground">CampusSync</span>
               <span className="font-body text-[10px] text-muted-foreground">U. Cundinamarca</span>
             </div>
           </Link>
