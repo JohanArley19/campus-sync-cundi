@@ -14,78 +14,103 @@ export type Database = {
   }
   public: {
     Tables: {
-      activity_log: {
+      activities: {
         Row: {
-          action: string
+          ai_analyzed_at: string | null
+          ai_reasoning: string | null
+          ai_suggested_priority:
+            | Database["public"]["Enums"]["activity_priority"]
+            | null
           created_at: string
-          details: Json | null
-          entity_id: string | null
-          entity_type: string
+          description: string | null
+          due_date: string | null
           id: string
-          roadmap_id: string
-          user_id: string
-        }
-        Insert: {
-          action: string
-          created_at?: string
-          details?: Json | null
-          entity_id?: string | null
-          entity_type: string
-          id?: string
-          roadmap_id: string
-          user_id: string
-        }
-        Update: {
-          action?: string
-          created_at?: string
-          details?: Json | null
-          entity_id?: string | null
-          entity_type?: string
-          id?: string
-          roadmap_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "activity_log_roadmap_id_fkey"
-            columns: ["roadmap_id"]
-            isOneToOne: false
-            referencedRelation: "roadmaps"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      comments: {
-        Row: {
-          content: string
-          created_at: string
-          id: string
-          roadmap_item_id: string
+          priority: Database["public"]["Enums"]["activity_priority"]
+          status: Database["public"]["Enums"]["activity_status"]
+          subject_id: string
+          title: string
           updated_at: string
           user_id: string
         }
         Insert: {
-          content: string
+          ai_analyzed_at?: string | null
+          ai_reasoning?: string | null
+          ai_suggested_priority?:
+            | Database["public"]["Enums"]["activity_priority"]
+            | null
           created_at?: string
+          description?: string | null
+          due_date?: string | null
           id?: string
-          roadmap_item_id: string
+          priority?: Database["public"]["Enums"]["activity_priority"]
+          status?: Database["public"]["Enums"]["activity_status"]
+          subject_id: string
+          title: string
           updated_at?: string
           user_id: string
         }
         Update: {
-          content?: string
+          ai_analyzed_at?: string | null
+          ai_reasoning?: string | null
+          ai_suggested_priority?:
+            | Database["public"]["Enums"]["activity_priority"]
+            | null
           created_at?: string
+          description?: string | null
+          due_date?: string | null
           id?: string
-          roadmap_item_id?: string
+          priority?: Database["public"]["Enums"]["activity_priority"]
+          status?: Database["public"]["Enums"]["activity_status"]
+          subject_id?: string
+          title?: string
           updated_at?: string
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "comments_roadmap_item_id_fkey"
-            columns: ["roadmap_item_id"]
+            foreignKeyName: "activities_subject_id_fkey"
+            columns: ["subject_id"]
             isOneToOne: false
-            referencedRelation: "roadmap_items"
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      completion_history: {
+        Row: {
+          activity_id: string | null
+          id: string
+          new_status: Database["public"]["Enums"]["activity_status"]
+          previous_status: Database["public"]["Enums"]["activity_status"] | null
+          recorded_at: string
+          user_id: string
+        }
+        Insert: {
+          activity_id?: string | null
+          id?: string
+          new_status: Database["public"]["Enums"]["activity_status"]
+          previous_status?:
+            | Database["public"]["Enums"]["activity_status"]
+            | null
+          recorded_at?: string
+          user_id: string
+        }
+        Update: {
+          activity_id?: string | null
+          id?: string
+          new_status?: Database["public"]["Enums"]["activity_status"]
+          previous_status?:
+            | Database["public"]["Enums"]["activity_status"]
+            | null
+          recorded_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "completion_history_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
             referencedColumns: ["id"]
           },
         ]
@@ -117,114 +142,38 @@ export type Database = {
         }
         Relationships: []
       }
-      roadmap_items: {
+      subjects: {
         Row: {
-          color: string | null
+          code: string | null
+          color: string
           created_at: string
-          description: string | null
-          end_date: string | null
-          height: number
           id: string
-          owner: string | null
-          position_x: number
-          position_y: number
-          priority: Database["public"]["Enums"]["item_priority"]
-          roadmap_id: string
-          sort_order: number
-          start_date: string | null
-          status: Database["public"]["Enums"]["item_status"]
-          title: string
+          name: string
+          semester: string | null
           updated_at: string
-          width: number
+          user_id: string
         }
         Insert: {
-          color?: string | null
+          code?: string | null
+          color?: string
           created_at?: string
-          description?: string | null
-          end_date?: string | null
-          height?: number
           id?: string
-          owner?: string | null
-          position_x?: number
-          position_y?: number
-          priority?: Database["public"]["Enums"]["item_priority"]
-          roadmap_id: string
-          sort_order?: number
-          start_date?: string | null
-          status?: Database["public"]["Enums"]["item_status"]
-          title: string
+          name: string
+          semester?: string | null
           updated_at?: string
-          width?: number
+          user_id: string
         }
         Update: {
-          color?: string | null
+          code?: string | null
+          color?: string
           created_at?: string
-          description?: string | null
-          end_date?: string | null
-          height?: number
           id?: string
-          owner?: string | null
-          position_x?: number
-          position_y?: number
-          priority?: Database["public"]["Enums"]["item_priority"]
-          roadmap_id?: string
-          sort_order?: number
-          start_date?: string | null
-          status?: Database["public"]["Enums"]["item_status"]
-          title?: string
+          name?: string
+          semester?: string | null
           updated_at?: string
-          width?: number
+          user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "roadmap_items_roadmap_id_fkey"
-            columns: ["roadmap_id"]
-            isOneToOne: false
-            referencedRelation: "roadmaps"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      roadmaps: {
-        Row: {
-          created_at: string
-          created_by: string
-          description: string | null
-          id: string
-          template_type: string | null
-          title: string
-          updated_at: string
-          workspace_id: string
-        }
-        Insert: {
-          created_at?: string
-          created_by: string
-          description?: string | null
-          id?: string
-          template_type?: string | null
-          title: string
-          updated_at?: string
-          workspace_id: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string
-          description?: string | null
-          id?: string
-          template_type?: string | null
-          title?: string
-          updated_at?: string
-          workspace_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "roadmaps_workspace_id_fkey"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "workspaces"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_roles: {
         Row: {
@@ -244,110 +193,6 @@ export type Database = {
         }
         Relationships: []
       }
-      workspace_invitations: {
-        Row: {
-          created_at: string
-          email: string
-          id: string
-          invited_by: string
-          role: Database["public"]["Enums"]["app_role"]
-          status: string
-          token: string
-          workspace_id: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id?: string
-          invited_by: string
-          role?: Database["public"]["Enums"]["app_role"]
-          status?: string
-          token?: string
-          workspace_id: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: string
-          invited_by?: string
-          role?: Database["public"]["Enums"]["app_role"]
-          status?: string
-          token?: string
-          workspace_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "workspace_invitations_workspace_id_fkey"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "workspaces"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      workspace_members: {
-        Row: {
-          created_at: string
-          id: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
-          workspace_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          role?: Database["public"]["Enums"]["app_role"]
-          user_id: string
-          workspace_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          role?: Database["public"]["Enums"]["app_role"]
-          user_id?: string
-          workspace_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "workspace_members_user_id_profiles_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "workspace_members_workspace_id_fkey"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "workspaces"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      workspaces: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-          owner_id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name: string
-          owner_id: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-          owner_id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
@@ -360,39 +205,11 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_comment_editor: {
-        Args: { _item_id: string; _user_id: string }
-        Returns: boolean
-      }
-      is_comment_member: {
-        Args: { _item_id: string; _user_id: string }
-        Returns: boolean
-      }
-      is_invitation_recipient: {
-        Args: { _invitation_id: string; _user_id: string }
-        Returns: boolean
-      }
-      is_roadmap_editor: {
-        Args: { _roadmap_id: string; _user_id: string }
-        Returns: boolean
-      }
-      is_roadmap_member: {
-        Args: { _roadmap_id: string; _user_id: string }
-        Returns: boolean
-      }
-      is_workspace_co_member: {
-        Args: { _target_user_id: string; _viewer_id: string }
-        Returns: boolean
-      }
-      is_workspace_member: {
-        Args: { _user_id: string; _workspace_id: string }
-        Returns: boolean
-      }
     }
     Enums: {
+      activity_priority: "baja" | "media" | "alta"
+      activity_status: "pendiente" | "realizada" | "no_realizada"
       app_role: "admin" | "member" | "viewer"
-      item_priority: "low" | "medium" | "high"
-      item_status: "planned" | "in_progress" | "completed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -520,9 +337,9 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      activity_priority: ["baja", "media", "alta"],
+      activity_status: ["pendiente", "realizada", "no_realizada"],
       app_role: ["admin", "member", "viewer"],
-      item_priority: ["low", "medium", "high"],
-      item_status: ["planned", "in_progress", "completed"],
     },
   },
 } as const
