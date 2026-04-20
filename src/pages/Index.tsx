@@ -1,462 +1,310 @@
-import { useState, useCallback, useMemo } from "react";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/layout/AppSidebar";
-import { InspectorPanel } from "@/components/layout/InspectorPanel";
-import { RoadmapCanvas } from "@/components/canvas/RoadmapCanvas";
-import { RoadmapListView } from "@/components/list/RoadmapListView";
-import { EmptyCanvasState } from "@/components/canvas/EmptyCanvasState";
-import { QuickAddSheet } from "@/components/canvas/QuickAddSheet";
-import { ProgressBar } from "@/components/layout/ProgressBar";
-import { MobileInspectorDrawer } from "@/components/layout/MobileInspectorDrawer";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
-import { Plus, LayoutGrid, List } from "lucide-react";
+import { useMemo } from "react";
+import { Link } from "react-router-dom";
+import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { celebrateItemCreated, celebrateDuplicated, celebrateDragSaved } from "@/lib/celebrations";
+import SEOHead from "@/components/SEOHead";
+import { useActivities } from "@/hooks/useActivities";
+import { useSubjects } from "@/hooks/useSubjects";
+import { completionRate, daysUntil, STATUS_LABELS, PRIORITY_LABELS } from "@/lib/academic";
+import { BookOpen, ListChecks, AlertTriangle, CheckCircle2, ArrowRight, Sparkles } from "lucide-react";
 import {
-  useWorkspaceSetup,
-  useRoadmaps,
-  useRoadmapItems,
-  useCreateRoadmapItem,
-  useUpdateRoadmapItem,
-  useDeleteRoadmapItem,
-  useCreateRoadmap,
-  useDeleteRoadmap,
-} from "@/hooks/useRoadmap";
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
+import { Badge } from "@/components/ui/badge";
 
-const TEMPLATE_ITEMS = [
-  { title: "Discovery & Research", status: "completed" as const, priority: "high" as const, sort_order: 0 },
-  { title: "Define MVP Scope", status: "in_progress" as const, priority: "high" as const, sort_order: 1 },
-  { title: "Design & Prototyping", status: "planned" as const, priority: "medium" as const, sort_order: 2 },
-  { title: "Development Sprint 1", status: "planned" as const, priority: "medium" as const, sort_order: 3 },
-];
+const STATUS_COLORS = {
+  pendiente: "hsl(var(--status-pendiente))",
+  realizada: "hsl(var(--status-realizada))",
+  no_realizada: "hsl(var(--status-no-realizada))",
+};
+
+const PRIORITY_COLORS = {
+  alta: "hsl(var(--priority-alta))",
+  media: "hsl(var(--priority-media))",
+  baja: "hsl(var(--priority-baja))",
+};
 
 export default function Index() {
-  const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
-  const [showInspector, setShowInspector] = useState(true);
-  const [activeRoadmapId, setActiveRoadmapId] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<"canvas" | "list">(window.innerWidth < 768 ? "list" : "canvas");
-  const [quickAddOpen, setQuickAddOpen] = useState(false);
-  const [mobileInspectorOpen, setMobileInspectorOpen] = useState(false);
-  const [canvasStagePos, setCanvasStagePos] = useState({ x: 0, y: 0 });
+  const { data: activities = [], isLoading: actLoading } = useActivities();
+  const { data: subjects = [], isLoading: subLoading } = useSubjects();
 
-  const isMobile = useIsMobile();
+  const stats = useMemo(() => {
+    const total = activities.length;
+    const pendientes = activities.filter((a) => a.status === "pendiente").length;
+    const realizadas = activities.filter((a) => a.status === "realizada").length;
+    const noRealizadas = activities.filter((a) => a.status === "no_realizada").length;
+    const cumplimiento = completionRate(activities);
+    const proximas = activities
+      .filter((a) => a.status === "pendiente" && a.due_date)
+      .map((a) => ({ ...a, days: daysUntil(a.due_date) }))
+      .filter((a) => a.days !== null && a.days >= 0 && a.days <= 7)
+      .sort((a, b) => (a.days ?? 0) - (b.days ?? 0));
 
-  const { data: setup, isLoading: setupLoading } = useWorkspaceSetup();
-  const workspaceId = setup?.workspaceId;
-  const defaultRoadmapId = setup?.roadmapId;
+    const statusData = [
+      { name: STATUS_LABELS.pendiente, value: pendientes, color: STATUS_COLORS.pendiente },
+      { name: STATUS_LABELS.realizada, value: realizadas, color: STATUS_COLORS.realizada },
+      { name: STATUS_LABELS.no_realizada, value: noRealizadas, color: STATUS_COLORS.no_realizada },
+    ].filter((d) => d.value > 0);
 
-  const currentRoadmapId = activeRoadmapId ?? defaultRoadmapId;
-
-  const { data: roadmaps = [] } = useRoadmaps(workspaceId);
-  const { data: items = [] } = useRoadmapItems(currentRoadmapId);
-
-  const createItem = useCreateRoadmapItem(currentRoadmapId);
-  const updateItem = useUpdateRoadmapItem(currentRoadmapId);
-  const deleteItem = useDeleteRoadmapItem(currentRoadmapId);
-  const createRoadmap = useCreateRoadmap(workspaceId);
-  const deleteRoadmap = useDeleteRoadmap(workspaceId);
-
-  if (!activeRoadmapId && defaultRoadmapId) {
-    setActiveRoadmapId(defaultRoadmapId);
-  }
-
-  const completedCount = useMemo(() => items.filter((i) => i.status === "completed").length, [items]);
-
-  const selectedItems = useMemo(
-    () => items.filter((i) => selectedItemIds.has(i.id)),
-    [items, selectedItemIds]
-  );
-
-  const handleSelectItem = useCallback(
-    (id: string | null, additive?: boolean) => {
-      if (!id) {
-        setSelectedItemIds(new Set());
-        return;
-      }
-      setSelectedItemIds((prev) => {
-        if (additive) {
-          const next = new Set(prev);
-          if (next.has(id)) next.delete(id);
-          else next.add(id);
-          return next;
-        }
-        return new Set([id]);
+    const priorityCounts = { alta: 0, media: 0, baja: 0 };
+    activities
+      .filter((a) => a.status === "pendiente")
+      .forEach((a) => {
+        const p = (a.ai_suggested_priority ?? a.priority) as keyof typeof priorityCounts;
+        priorityCounts[p]++;
       });
-      if (isMobile) {
-        setMobileInspectorOpen(true);
-      } else if (!showInspector) {
-        setShowInspector(true);
-      }
-    },
-    [showInspector, isMobile]
-  );
+    const priorityData = (["alta", "media", "baja"] as const).map((p) => ({
+      name: PRIORITY_LABELS[p],
+      value: priorityCounts[p],
+      color: PRIORITY_COLORS[p],
+    }));
 
-  const handleItemDragEnd = useCallback(
-    (id: string, x: number, y: number, startDate?: string, endDate?: string) => {
-      const updates: any = { id, position_x: x, position_y: y };
-      if (startDate) updates.start_date = startDate;
-      if (endDate) updates.end_date = endDate;
-      updateItem.mutate(updates, {
-        onSuccess: () => celebrateDragSaved(),
-      });
-    },
-    [updateItem]
-  );
-
-  const handleQuickAdd = useCallback(
-    (data: { title: string; status: "planned" | "in_progress" | "completed"; priority: "low" | "medium" | "high"; start_date?: string; end_date?: string }) => {
-      if (!currentRoadmapId) return;
-      const row = Math.floor(items.length / 3);
-      const col = items.length % 3;
-      createItem.mutate(
-        {
-          title: data.title,
-          status: data.status,
-          priority: data.priority,
-          start_date: data.start_date || null,
-          end_date: data.end_date || null,
-          position_x: 50 + col * 220,
-          position_y: 70 + row * 90,
-          width: 200,
-          height: 56,
-          sort_order: items.length,
-        },
-        {
-          onSuccess: (newItem) => {
-            setSelectedItemIds(new Set([newItem.id]));
-            if (!isMobile && !showInspector) setShowInspector(true);
-            celebrateItemCreated(items.length + 1);
-          },
-        }
-      );
-    },
-    [currentRoadmapId, createItem, items.length, showInspector, isMobile]
-  );
-
-  const handleAddItem = useCallback(() => {
-    setQuickAddOpen(true);
-  }, []);
-
-  const handleAddTemplate = useCallback(() => {
-    if (!currentRoadmapId) return;
-    TEMPLATE_ITEMS.forEach((tmpl, i) => {
-      createItem.mutate({
-        ...tmpl,
-        position_x: 50 + (i % 2) * 240,
-        position_y: 70 + Math.floor(i / 2) * 90,
-        width: 220,
-        height: 56,
-        sort_order: items.length + i,
-      });
+    const subjectData = subjects.map((s) => {
+      const subjectActs = activities.filter((a) => a.subject_id === s.id);
+      return {
+        name: s.name.length > 15 ? s.name.slice(0, 15) + "…" : s.name,
+        pendientes: subjectActs.filter((a) => a.status === "pendiente").length,
+        realizadas: subjectActs.filter((a) => a.status === "realizada").length,
+      };
     });
-    toast.success("🎨 Template loaded — customize it to make it yours!");
-  }, [currentRoadmapId, createItem, items.length]);
 
-  const handleInlineEdit = useCallback(
-    (id: string, title: string) => {
-      updateItem.mutate({ id, title });
-    },
-    [updateItem]
-  );
+    return { total, pendientes, realizadas, noRealizadas, cumplimiento, proximas, statusData, priorityData, subjectData };
+  }, [activities, subjects]);
 
-  const handleCreateRoadmap = useCallback(() => {
-    createRoadmap.mutate("Untitled Roadmap", {
-      onSuccess: (data) => {
-        setActiveRoadmapId(data.id);
-        toast.success("Roadmap created");
-      },
-    });
-  }, [createRoadmap]);
-
-  const handleDeleteRoadmap = useCallback(
-    (id: string) => {
-      deleteRoadmap.mutate(id, {
-        onSuccess: () => {
-          if (activeRoadmapId === id) {
-            const remaining = roadmaps.filter((r) => r.id !== id);
-            setActiveRoadmapId(remaining.length > 0 ? remaining[0].id : null);
-          }
-          toast.success("Roadmap deleted");
-        },
-      });
-    },
-    [deleteRoadmap, activeRoadmapId, roadmaps]
-  );
-
-  const handleBatchUpdate = useCallback(
-    (ids: string[], updates: any) => {
-      ids.forEach((id) => updateItem.mutate({ id, ...updates }));
-    },
-    [updateItem]
-  );
-
-  const handleDeleteItems = useCallback(
-    (ids: string[]) => {
-      ids.forEach((id) =>
-        deleteItem.mutate(id, {
-          onSuccess: () => {
-            setSelectedItemIds((prev) => {
-              const next = new Set(prev);
-              next.delete(id);
-              return next;
-            });
-          },
-        })
-      );
-      toast.success(`${ids.length} item${ids.length > 1 ? "s" : ""} deleted`);
-    },
-    [deleteItem]
-  );
-
-  const handleDuplicate = useCallback(
-    (id: string) => {
-      const item = items.find((i) => i.id === id);
-      if (!item || !currentRoadmapId) return;
-      createItem.mutate(
-        {
-          title: `${item.title} (copy)`,
-          description: item.description,
-          position_x: item.position_x + 20,
-          position_y: item.position_y + 20,
-          width: item.width,
-          height: item.height,
-          status: item.status,
-          priority: item.priority,
-          owner: item.owner,
-          start_date: item.start_date,
-          end_date: item.end_date,
-          sort_order: items.length,
-        },
-        {
-          onSuccess: (data) => {
-            setSelectedItemIds(new Set([data.id]));
-            celebrateDuplicated();
-          },
-        }
-      );
-    },
-    [items, currentRoadmapId, createItem]
-  );
-
-  useKeyboardShortcuts({
-    selectedItemIds,
-    allItemIds: items.map((i) => i.id),
-    onDelete: handleDeleteItems,
-    onDeselect: () => setSelectedItemIds(new Set()),
-    onSelectAll: () => setSelectedItemIds(new Set(items.map((i) => i.id))),
-    onDuplicate: handleDuplicate,
-  });
-
-  const activeRoadmap = roadmaps.find((r) => r.id === currentRoadmapId);
-
-  if (setupLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <p className="font-display text-sm text-muted-foreground animate-fade-in">Loading workspace...</p>
-      </div>
-    );
-  }
-
-  const canvasItems = items.map((item) => ({
-    id: item.id,
-    title: item.title,
-    description: item.description ?? "",
-    status: item.status as "planned" | "in_progress" | "completed",
-    priority: item.priority as "low" | "medium" | "high",
-    owner: item.owner ?? "",
-    startDate: item.start_date ?? "",
-    endDate: item.end_date ?? "",
-    x: item.position_x,
-    y: item.position_y,
-    width: item.width,
-    height: item.height,
-  }));
-
-  const showEmptyState = items.length === 0 && viewMode === "canvas";
+  const isEmpty = !actLoading && !subLoading && subjects.length === 0;
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <AppSidebar
-          roadmaps={roadmaps}
-          activeRoadmapId={currentRoadmapId ?? null}
-          onSelectRoadmap={setActiveRoadmapId}
-          onCreateRoadmap={handleCreateRoadmap}
-          onDeleteRoadmap={handleDeleteRoadmap}
-          workspaceId={workspaceId ?? null}
-        />
+    <AppShell title="Dashboard" subtitle="Resumen de tu actividad académica">
+      <SEOHead title="Dashboard — Sistema Académico" description="Visualiza tus métricas académicas." />
 
-        <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-11 flex items-center justify-between border-b bg-card px-3 shrink-0">
-            <div className="flex items-center gap-2">
-              <SidebarTrigger className="h-7 w-7" />
-              <span className="font-display text-sm font-medium text-foreground truncate">
-                {activeRoadmap?.title ?? "Roadmap"}
-              </span>
-              {items.length > 0 && !isMobile && (
-                <ProgressBar total={items.length} completed={completedCount} />
-              )}
+      <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6 animate-fade-in">
+        {isEmpty ? (
+          <EmptyDashboard />
+        ) : (
+          <>
+            {/* KPIs */}
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <KpiCard
+                icon={BookOpen}
+                label="Materias"
+                value={subjects.length}
+                tone="primary"
+              />
+              <KpiCard
+                icon={ListChecks}
+                label="Pendientes"
+                value={stats.pendientes}
+                tone="warning"
+              />
+              <KpiCard
+                icon={CheckCircle2}
+                label="Completadas"
+                value={stats.realizadas}
+                tone="success"
+              />
+              <KpiCard
+                icon={Sparkles}
+                label="Cumplimiento"
+                value={`${stats.cumplimiento}%`}
+                tone="accent"
+              />
             </div>
-            <div className="flex items-center gap-1">
-              {!isMobile && (
-                <>
-                  <Button
-                    variant={viewMode === "canvas" ? "secondary" : "ghost"}
-                    size="sm"
-                    onClick={() => setViewMode("canvas")}
-                    className="font-display text-xs gap-1.5 h-7"
-                  >
-                    <LayoutGrid className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button
-                    variant={viewMode === "list" ? "secondary" : "ghost"}
-                    size="sm"
-                    onClick={() => setViewMode("list")}
-                    className="font-display text-xs gap-1.5 h-7"
-                  >
-                    <List className="h-3.5 w-3.5" />
-                  </Button>
-                </>
-              )}
-              {!isMobile && (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={handleAddItem}
-                  className="font-display text-xs gap-1.5 font-medium"
-                >
-                  <Plus className="h-4 w-4" />
-                  Add Item
-                </Button>
-              )}
-              {isMobile && (
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant={viewMode === "canvas" ? "secondary" : "ghost"}
-                    size="icon"
-                    onClick={() => setViewMode("canvas")}
-                    className="h-7 w-7"
-                  >
-                    <LayoutGrid className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button
-                    variant={viewMode === "list" ? "secondary" : "ghost"}
-                    size="icon"
-                    onClick={() => setViewMode("list")}
-                    className="h-7 w-7"
-                  >
-                    <List className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              )}
-            </div>
-          </header>
 
-          <div className="flex-1 min-h-0 relative">
-            {showEmptyState ? (
-              <EmptyCanvasState onAddItem={handleAddItem} onAddTemplate={handleAddTemplate} />
-            ) : (
-              <ResizablePanelGroup direction="horizontal">
-                <ResizablePanel defaultSize={showInspector && !isMobile ? 75 : 100} minSize={50}>
-                  {viewMode === "canvas" ? (
-                    <RoadmapCanvas
-                      items={canvasItems}
-                      selectedItemIds={selectedItemIds}
-                      onSelectItem={handleSelectItem}
-                      onItemDragEnd={handleItemDragEnd}
-                      onInlineEdit={handleInlineEdit}
-                      stagePos={canvasStagePos}
-                      onStagePosChange={setCanvasStagePos}
-                    />
-                  ) : (
-                    <RoadmapListView
-                      items={canvasItems}
-                      selectedItemIds={selectedItemIds}
-                      onSelectItem={handleSelectItem}
-                    />
-                  )}
-                </ResizablePanel>
-
-                {showInspector && !isMobile && (
-                  <>
-                    <ResizableHandle />
-                    <ResizablePanel defaultSize={25} minSize={18} maxSize={40}>
-                      <div className="h-full bg-card">
-                        <InspectorPanel
-                          selectedItems={selectedItems}
-                          onClose={() => {
-                            setSelectedItemIds(new Set());
-                            setShowInspector(false);
-                          }}
-                          onUpdate={(updates) => updateItem.mutate(updates)}
-                          onDelete={(id) => {
-                            deleteItem.mutate(id, {
-                              onSuccess: () => {
-                                setSelectedItemIds((prev) => {
-                                  const next = new Set(prev);
-                                  next.delete(id);
-                                  return next;
-                                });
-                                toast.success("Item deleted");
-                              },
-                            });
-                          }}
-                          onBatchUpdate={handleBatchUpdate}
-                        />
-                      </div>
-                    </ResizablePanel>
-                  </>
+            {/* Charts */}
+            <div className="grid gap-4 lg:grid-cols-2">
+              <ChartCard title="Estado de actividades">
+                {stats.statusData.length === 0 ? (
+                  <EmptyChart message="Aún no tienes actividades" />
+                ) : (
+                  <ResponsiveContainer width="100%" height={240}>
+                    <PieChart>
+                      <Pie
+                        data={stats.statusData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={50}
+                        outerRadius={85}
+                        paddingAngle={3}
+                        dataKey="value"
+                      >
+                        {stats.statusData.map((entry, i) => (
+                          <Cell key={i} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
                 )}
-              </ResizablePanelGroup>
+              </ChartCard>
+
+              <ChartCard title="Prioridad sugerida (pendientes)">
+                {stats.priorityData.every((p) => p.value === 0) ? (
+                  <EmptyChart message="No hay actividades pendientes" />
+                ) : (
+                  <ResponsiveContainer width="100%" height={240}>
+                    <BarChart data={stats.priorityData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                      <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} allowDecimals={false} />
+                      <Tooltip />
+                      <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                        {stats.priorityData.map((entry, i) => (
+                          <Cell key={i} fill={entry.color} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </ChartCard>
+            </div>
+
+            {stats.subjectData.length > 0 && (
+              <ChartCard title="Actividades por materia">
+                <ResponsiveContainer width="100%" height={260}>
+                  <BarChart data={stats.subjectData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={11} />
+                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} allowDecimals={false} />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="pendientes" fill="hsl(var(--status-pendiente))" name="Pendientes" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="realizadas" fill="hsl(var(--status-realizada))" name="Realizadas" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartCard>
             )}
 
-            {/* Mobile FAB */}
-            {isMobile && (
-              <Button
-                size="lg"
-                className="fixed bottom-6 right-6 rounded-full h-14 w-14 shadow-lg z-40 animate-scale-in"
-                onClick={handleAddItem}
-              >
-                <Plus className="h-6 w-6" />
-              </Button>
+            {/* Próximas actividades */}
+            {stats.proximas.length > 0 && (
+              <div className="rounded-xl border border-border bg-card p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-accent" />
+                    <h2 className="font-display text-lg font-bold text-foreground">
+                      Próximas a vencer
+                    </h2>
+                  </div>
+                  <Link to="/app/actividades">
+                    <Button variant="ghost" size="sm" className="font-body">
+                      Ver todas
+                      <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                    </Button>
+                  </Link>
+                </div>
+                <div className="space-y-2">
+                  {stats.proximas.slice(0, 5).map((a) => (
+                    <div
+                      key={a.id}
+                      className="flex items-center justify-between gap-3 p-3 rounded-lg border border-border/60 bg-background"
+                    >
+                      <div className="min-w-0">
+                        <p className="font-body text-sm font-medium text-foreground truncate">
+                          {a.title}
+                        </p>
+                        <p className="font-body text-xs text-muted-foreground">
+                          {a.days === 0 ? "Vence hoy" : a.days === 1 ? "Vence mañana" : `En ${a.days} días`}
+                        </p>
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className="shrink-0"
+                        style={{
+                          borderColor: PRIORITY_COLORS[(a.ai_suggested_priority ?? a.priority) as keyof typeof PRIORITY_COLORS],
+                          color: PRIORITY_COLORS[(a.ai_suggested_priority ?? a.priority) as keyof typeof PRIORITY_COLORS],
+                        }}
+                      >
+                        {PRIORITY_LABELS[(a.ai_suggested_priority ?? a.priority) as keyof typeof PRIORITY_LABELS]}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
-          </div>
+          </>
+        )}
+      </div>
+    </AppShell>
+  );
+}
+
+function KpiCard({
+  icon: Icon,
+  label,
+  value,
+  tone,
+}: {
+  icon: any;
+  label: string;
+  value: string | number;
+  tone: "primary" | "warning" | "success" | "accent";
+}) {
+  const toneClasses = {
+    primary: "bg-primary-soft text-primary",
+    warning: "bg-accent-soft text-accent",
+    success: "bg-primary-soft text-primary",
+    accent: "bg-accent-soft text-accent",
+  };
+  return (
+    <div className="rounded-xl border border-border bg-card p-5">
+      <div className="flex items-center justify-between mb-3">
+        <span className="font-body text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+          {label}
+        </span>
+        <div className={`h-9 w-9 rounded-lg flex items-center justify-center ${toneClasses[tone]}`}>
+          <Icon className="h-4 w-4" />
         </div>
       </div>
+      <p className="font-display text-3xl font-black text-foreground">{value}</p>
+    </div>
+  );
+}
 
-      {/* Quick Add Sheet */}
-      <QuickAddSheet
-        open={quickAddOpen}
-        onOpenChange={setQuickAddOpen}
-        onSubmit={handleQuickAdd}
-      />
+function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-xl border border-border bg-card p-5">
+      <h3 className="font-display text-base font-bold text-foreground mb-3">{title}</h3>
+      {children}
+    </div>
+  );
+}
 
-      {/* Mobile Inspector Drawer */}
-      {isMobile && (
-        <MobileInspectorDrawer
-          open={mobileInspectorOpen}
-          onOpenChange={setMobileInspectorOpen}
-          selectedItems={selectedItems}
-          onClose={() => setSelectedItemIds(new Set())}
-          onUpdate={(updates) => updateItem.mutate(updates)}
-          onDelete={(id) => {
-            deleteItem.mutate(id, {
-              onSuccess: () => {
-                setSelectedItemIds((prev) => {
-                  const next = new Set(prev);
-                  next.delete(id);
-                  return next;
-                });
-                toast.success("Item deleted");
-              },
-            });
-          }}
-          onBatchUpdate={handleBatchUpdate}
-        />
-      )}
-    </SidebarProvider>
+function EmptyChart({ message }: { message: string }) {
+  return (
+    <div className="h-[240px] flex items-center justify-center text-sm text-muted-foreground font-body">
+      {message}
+    </div>
+  );
+}
+
+function EmptyDashboard() {
+  return (
+    <div className="rounded-xl border border-dashed border-border bg-card p-10 text-center max-w-2xl mx-auto">
+      <div className="h-14 w-14 rounded-full gradient-hero mx-auto flex items-center justify-center shadow-emerald mb-5">
+        <BookOpen className="h-7 w-7 text-primary-foreground" />
+      </div>
+      <h2 className="font-display text-2xl font-bold text-foreground mb-2">
+        Empieza por agregar tu primera materia
+      </h2>
+      <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+        Una vez que tengas materias y actividades, aquí verás tus métricas, gráficos y las tareas que están por vencer.
+      </p>
+      <Link to="/app/materias">
+        <Button size="lg" className="font-body shadow-emerald">
+          Crear primera materia
+          <ArrowRight className="ml-1.5 h-4 w-4" />
+        </Button>
+      </Link>
+    </div>
   );
 }
