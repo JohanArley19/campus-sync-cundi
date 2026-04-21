@@ -29,10 +29,11 @@
     --primary-glow: 150 56% 38%;
     --primary-soft: 150 40% 95%;
 
-    /* Dorado institucional */
-    --accent: 43 74% 49%;
+    /* Dorado institucional — más presente */
+    --accent: 43 82% 47%;
     --accent-foreground: 0 0% 8%;
-    --accent-soft: 43 80% 95%;
+    --accent-soft: 43 88% 92%;
+    --accent-glow: 43 90% 58%;
 
     --secondary: 0 0% 96%;
     --secondary-foreground: 0 0% 8%;
