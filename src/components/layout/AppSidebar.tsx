@@ -1,4 +1,4 @@
-import { GraduationCap, LogOut, BookOpen, ListChecks, LayoutDashboard, Sparkles } from "lucide-react";
+import { GraduationCap, LogOut, BookOpen, ListChecks, LayoutDashboard, Sparkles, Shield } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -15,6 +15,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 const NAV_ITEMS = [
   { title: "Dashboard", url: "/app", icon: LayoutDashboard, end: true },
@@ -23,11 +24,15 @@ const NAV_ITEMS = [
   { title: "Asistente IA", url: "/app/asistente", icon: Sparkles, end: false },
 ];
 
+const ADMIN_ITEM = { title: "Admin", url: "/app/admin", icon: Shield, end: false };
+
 export function AppSidebar() {
   const { state, isMobile } = useSidebar();
   const collapsed = state === "collapsed" && !isMobile;
   const { signOut, user } = useAuth();
   const location = useLocation();
+  const { data: isAdmin } = useIsAdmin();
+  const navItems = isAdmin ? [...NAV_ITEMS, ADMIN_ITEM] : NAV_ITEMS;
 
   return (
     <Sidebar collapsible="icon" className="border-r">
@@ -56,7 +61,7 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {NAV_ITEMS.map((item) => {
+              {navItems.map((item) => {
                 const Icon = item.icon;
                 const active = item.end
                   ? location.pathname === item.url
