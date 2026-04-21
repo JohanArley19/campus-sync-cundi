@@ -2,6 +2,8 @@
 // Usa Lovable AI Gateway (Gemini) para sugerir prioridad de una actividad académica
 // con base en las 4 variables del documento del proyecto.
 
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -22,6 +24,28 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // --- Auth check ---
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "No autenticado" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    const token = authHeader.replace("Bearer ", "");
+    const supa = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+    const { data: claimsData, error: claimsErr } = await supa.auth.getClaims(token);
+    if (claimsErr || !claimsData?.claims) {
+      return new Response(
+        JSON.stringify({ error: "Sesión inválida" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const body = (await req.json()) as PrioritizeRequest;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -116,7 +140,7 @@ Devuelve solo el JSON con priority y reasoning.`;
   } catch (err) {
     console.error("prioritize-activity error:", err);
     return new Response(
-      JSON.stringify({ error: err instanceof Error ? err.message : "Error desconocido" }),
+      JSON.stringify({ error: "Error interno. Intenta más tarde." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
