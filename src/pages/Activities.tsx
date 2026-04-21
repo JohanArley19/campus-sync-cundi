@@ -396,8 +396,12 @@ export default function Activities() {
                                 <Button
                                   key={s}
                                   size="sm"
-                                  variant={active ? "default" : "outline"}
-                                  className="h-7 px-2 font-body text-xs"
+                                  variant="outline"
+                                  className={`h-7 px-2 font-body text-xs transition-colors ${
+                                    active
+                                      ? STATUS_ACTIVE_CLASSES[s]
+                                      : STATUS_INACTIVE_CLASSES[s]
+                                  }`}
                                   onClick={() => handleQuickStatus(a, s)}
                                 >
                                   <Icon className="h-3 w-3 mr-1" />
