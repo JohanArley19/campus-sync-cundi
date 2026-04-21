@@ -140,7 +140,7 @@ Devuelve solo el JSON con priority y reasoning.`;
   } catch (err) {
     console.error("prioritize-activity error:", err);
     return new Response(
-      JSON.stringify({ error: err instanceof Error ? err.message : "Error desconocido" }),
+      JSON.stringify({ error: "Error interno. Intenta más tarde." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
