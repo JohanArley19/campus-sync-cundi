@@ -222,6 +222,43 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_exists: { Args: never; Returns: boolean }
+      admin_global_metrics: { Args: never; Returns: Json }
+      admin_student_overview: {
+        Args: never
+        Returns: {
+          completion_pct: number
+          display_name: string
+          joined_at: string
+          last_activity_at: string
+          no_realizadas: number
+          pendientes: number
+          realizadas: number
+          subjects_count: number
+          total_activities: number
+          user_id: string
+          vencidas: number
+        }[]
+      }
+      admin_subject_distribution: {
+        Args: never
+        Returns: {
+          completion_pct: number
+          students_count: number
+          subject_name: string
+          total_activities: number
+        }[]
+      }
+      admin_weekly_trend: {
+        Args: never
+        Returns: {
+          creadas: number
+          no_realizadas: number
+          realizadas: number
+          week_start: string
+        }[]
+      }
+      bootstrap_first_admin: { Args: never; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
