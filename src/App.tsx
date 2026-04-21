@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { AdminRoute } from "@/components/auth/AdminRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -14,6 +15,7 @@ import Landing from "./pages/Landing";
 import Subjects from "./pages/Subjects";
 import Activities from "./pages/Activities";
 import Assistant from "./pages/Assistant";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -61,6 +63,14 @@ const App = () => (
                 <ProtectedRoute>
                   <Assistant />
                 </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/app/admin"
+              element={
+                <AdminRoute>
+                  <Admin />
+                </AdminRoute>
               }
             />
             <Route path="*" element={<NotFound />} />

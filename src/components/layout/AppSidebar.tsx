@@ -1,4 +1,4 @@
-import { GraduationCap, LogOut, BookOpen, ListChecks, LayoutDashboard, Sparkles } from "lucide-react";
+import { GraduationCap, LogOut, BookOpen, ListChecks, LayoutDashboard, Sparkles, Shield } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -15,6 +15,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 const NAV_ITEMS = [
   { title: "Dashboard", url: "/app", icon: LayoutDashboard, end: true },
@@ -22,6 +23,8 @@ const NAV_ITEMS = [
   { title: "Actividades", url: "/app/actividades", icon: ListChecks, end: false },
   { title: "Asistente IA", url: "/app/asistente", icon: Sparkles, end: false },
 ];
+
+const ADMIN_ITEM = { title: "Admin", url: "/app/admin", icon: Shield, end: false };
 
 export function AppSidebar() {
   const { state, isMobile } = useSidebar();
