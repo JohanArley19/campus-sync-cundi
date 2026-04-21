@@ -39,6 +39,21 @@ const STATUS_ICONS: Record<ActivityStatus, any> = {
   no_realizada: XCircle,
 };
 
+const STATUS_ACTIVE_CLASSES: Record<ActivityStatus, string> = {
+  pendiente:
+    "bg-accent text-accent-foreground border-accent hover:bg-accent/90 hover:text-accent-foreground shadow-sm",
+  realizada:
+    "bg-success text-success-foreground border-success hover:bg-success/90 hover:text-success-foreground shadow-sm",
+  no_realizada:
+    "bg-destructive text-destructive-foreground border-destructive hover:bg-destructive/90 hover:text-destructive-foreground shadow-sm",
+};
+
+const STATUS_INACTIVE_CLASSES: Record<ActivityStatus, string> = {
+  pendiente: "hover:border-accent/50 hover:text-accent",
+  realizada: "hover:border-success/50 hover:text-success",
+  no_realizada: "hover:border-destructive/50 hover:text-destructive",
+};
+
 export default function Activities() {
   const { data: activities = [], isLoading } = useActivities();
   const { data: subjects = [] } = useSubjects();
@@ -381,8 +396,12 @@ export default function Activities() {
                                 <Button
                                   key={s}
                                   size="sm"
-                                  variant={active ? "default" : "outline"}
-                                  className="h-7 px-2 font-body text-xs"
+                                  variant="outline"
+                                  className={`h-7 px-2 font-body text-xs transition-colors ${
+                                    active
+                                      ? STATUS_ACTIVE_CLASSES[s]
+                                      : STATUS_INACTIVE_CLASSES[s]
+                                  }`}
                                   onClick={() => handleQuickStatus(a, s)}
                                 >
                                   <Icon className="h-3 w-3 mr-1" />
