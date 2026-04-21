@@ -38,8 +38,8 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_ANON_KEY")!,
       { global: { headers: { Authorization: authHeader } } }
     );
-    const { data: claimsData, error: claimsErr } = await supa.auth.getClaims(token);
-    if (claimsErr || !claimsData?.claims) {
+    const { data: userData, error: userErr } = await supa.auth.getUser(token);
+    if (userErr || !userData?.user) {
       return new Response(
         JSON.stringify({ error: "Sesión inválida" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
