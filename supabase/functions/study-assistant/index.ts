@@ -47,7 +47,31 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { messages } = (await req.json()) as { messages: ChatMsg[] };
+    const body = await req.json().catch(() => null);
+    if (!body || !Array.isArray(body.messages)) {
+      return new Response(
+        JSON.stringify({ error: "Payload inválido" }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
+    const MAX_MESSAGES = 40;
+    const MAX_CONTENT = 4000;
+    const messages: ChatMsg[] = (body.messages as ChatMsg[])
+      .filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
+      .slice(-MAX_MESSAGES)
+      .map((m) => ({ role: m.role, content: m.content.slice(0, MAX_CONTENT) }));
+    if (messages.length === 0) {
+      return new Response(
+        JSON.stringify({ error: "Sin mensajes válidos" }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
 
     // Cargar contexto académico (RLS limita a sus propios datos)
     const [{ data: subjects }, { data: activities }] = await Promise.all([
@@ -150,9 +174,7 @@ ${contextLines.join("\n")}`;
   } catch (err) {
     console.error("study-assistant error:", err);
     return new Response(
-      JSON.stringify({
-        error: err instanceof Error ? err.message : "Error desconocido",
-      }),
+      JSON.stringify({ error: "Error interno. Intenta más tarde." }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

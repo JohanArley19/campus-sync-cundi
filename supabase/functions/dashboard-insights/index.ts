@@ -223,9 +223,7 @@ Genera el JSON.`;
   } catch (err) {
     console.error("dashboard-insights error:", err);
     return new Response(
-      JSON.stringify({
-        error: err instanceof Error ? err.message : "Error desconocido",
-      }),
+      JSON.stringify({ error: "Error interno. Intenta más tarde." }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
