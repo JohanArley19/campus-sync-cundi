@@ -66,10 +66,14 @@ export function AppSidebar() {
                     <SidebarMenuButton
                       asChild
                       tooltip={collapsed ? item.title : undefined}
-                      className={active ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : ""}
+                      className={
+                        active
+                          ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium border-l-[3px] border-accent rounded-l-none"
+                          : "border-l-[3px] border-transparent"
+                      }
                     >
                       <NavLink to={item.url} end={item.end}>
-                        <Icon className="h-4 w-4" />
+                        <Icon className={`h-4 w-4 ${active ? "text-accent" : ""}`} />
                         {!collapsed && <span className="font-body text-sm">{item.title}</span>}
                       </NavLink>
                     </SidebarMenuButton>
