@@ -31,6 +31,8 @@ export function AppSidebar() {
   const collapsed = state === "collapsed" && !isMobile;
   const { signOut, user } = useAuth();
   const location = useLocation();
+  const { data: isAdmin } = useIsAdmin();
+  const navItems = isAdmin ? [...NAV_ITEMS, ADMIN_ITEM] : NAV_ITEMS;
 
   return (
     <Sidebar collapsible="icon" className="border-r">
@@ -59,7 +61,7 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {NAV_ITEMS.map((item) => {
+              {navItems.map((item) => {
                 const Icon = item.icon;
                 const active = item.end
                   ? location.pathname === item.url
