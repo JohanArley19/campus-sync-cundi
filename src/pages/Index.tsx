@@ -8,6 +8,7 @@ import { useSubjects } from "@/hooks/useSubjects";
 import { completionRate, daysUntil, STATUS_LABELS, PRIORITY_LABELS } from "@/lib/academic";
 import { BookOpen, ListChecks, AlertTriangle, CheckCircle2, ArrowRight, Sparkles } from "lucide-react";
 import { AIInsightsCard } from "@/components/dashboard/AIInsightsCard";
+import { PromoteAdminButton } from "@/components/admin/PromoteAdminButton";
 import {
   PieChart,
   Pie,
@@ -89,6 +90,7 @@ export default function Index() {
       <SEOHead title="Dashboard — CampusSync" description="Visualiza tus métricas académicas en CampusSync." />
 
       <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6 animate-fade-in">
+        <PromoteAdminButton />
         {isEmpty ? (
           <EmptyDashboard />
         ) : (
