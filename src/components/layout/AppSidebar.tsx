@@ -31,9 +31,9 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r">
-      <SidebarHeader className="p-4">
+      <SidebarHeader className="p-4 border-b-2 border-accent/40">
         <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg gradient-hero flex items-center justify-center shrink-0 shadow-sm">
+          <div className="h-8 w-8 rounded-lg gradient-hero flex items-center justify-center shrink-0 shadow-sm ring-2 ring-accent/30">
             <GraduationCap className="h-5 w-5 text-primary-foreground" />
           </div>
           {!collapsed && (
@@ -41,7 +41,7 @@ export function AppSidebar() {
               <span className="font-display text-sm font-bold text-foreground leading-tight truncate">
                 CampusSync
               </span>
-              <span className="font-body text-[10px] text-muted-foreground leading-tight truncate">
+              <span className="font-body text-[10px] text-accent leading-tight truncate font-semibold">
                 U. Cundinamarca
               </span>
             </div>
