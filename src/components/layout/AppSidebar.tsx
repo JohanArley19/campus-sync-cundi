@@ -1,4 +1,4 @@
-import { GraduationCap, LogOut, BookOpen, ListChecks, LayoutDashboard, Sparkles, Shield } from "lucide-react";
+import { GraduationCap, LogOut, BookOpen, ListChecks, LayoutDashboard, Shield } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -17,14 +17,15 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 
-const NAV_ITEMS = [
+const STUDENT_NAV = [
   { title: "Dashboard", url: "/app", icon: LayoutDashboard, end: true },
   { title: "Materias", url: "/app/materias", icon: BookOpen, end: false },
   { title: "Actividades", url: "/app/actividades", icon: ListChecks, end: false },
-  { title: "Asistente IA", url: "/app/asistente", icon: Sparkles, end: false },
 ];
 
-const ADMIN_ITEM = { title: "Admin", url: "/app/admin", icon: Shield, end: false };
+const ADMIN_NAV = [
+  { title: "Panel admin", url: "/app/admin", icon: Shield, end: true },
+];
 
 export function AppSidebar() {
   const { state, isMobile } = useSidebar();
@@ -32,7 +33,8 @@ export function AppSidebar() {
   const { signOut, user } = useAuth();
   const location = useLocation();
   const { data: isAdmin } = useIsAdmin();
-  const navItems = isAdmin ? [...NAV_ITEMS, ADMIN_ITEM] : NAV_ITEMS;
+  // El admin solo ve el panel admin (no crea materias ni actividades).
+  const navItems = isAdmin ? ADMIN_NAV : STUDENT_NAV;
 
   return (
     <Sidebar collapsible="icon" className="border-r">
