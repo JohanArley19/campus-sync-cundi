@@ -142,8 +142,51 @@ export default function Admin() {
   const adoptionPct =
     m && m.total_students > 0 ? Math.round((m.active_students_7d / m.total_students) * 100) : 0;
 
+  const navigate = useNavigate();
+
+  const handleExportGlobal = () => {
+    if (!m) return;
+    try {
+      downloadGlobalReportPdf({
+        metrics: m,
+        students: students.map((s) => ({
+          display_name: s.display_name,
+          subjects_count: s.subjects_count,
+          total_activities: s.total_activities,
+          pendientes: s.pendientes,
+          realizadas: s.realizadas,
+          vencidas: s.vencidas,
+          completion_pct: Number(s.completion_pct),
+        })),
+        weekly: (weeklyQ.data ?? []).map((w) => ({
+          week_start: w.week_start,
+          realizadas: Number(w.realizadas),
+          no_realizadas: Number(w.no_realizadas),
+          creadas: Number(w.creadas),
+        })),
+        subjects: (subjectsQ.data ?? []).map((s) => ({
+          subject_name: s.subject_name,
+          students_count: Number(s.students_count),
+          total_activities: Number(s.total_activities),
+          completion_pct: Number(s.completion_pct),
+        })),
+      });
+      toast.success("Reporte PDF generado");
+    } catch {
+      toast.error("No se pudo generar el PDF");
+    }
+  };
+
   return (
-    <AppShell title="Panel administrador" subtitle="Visión global del aplicativo">
+    <AppShell
+      title="Panel administrador"
+      subtitle="Visión global del aplicativo"
+      actions={
+        <Button size="sm" onClick={handleExportGlobal} disabled={!m} className="font-body">
+          <FileDown className="h-4 w-4 mr-1" /> Exportar PDF
+        </Button>
+      }
+    >
       <SEOHead title="Admin — CampusSync" description="Dashboard administrativo de CampusSync." />
 
       <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6 animate-fade-in">
@@ -390,9 +433,16 @@ export default function Admin() {
                 </TableHeader>
                 <TableBody>
                   {students.map((s) => (
-                    <TableRow key={s.user_id}>
+                    <TableRow
+                      key={s.user_id}
+                      className="cursor-pointer hover:bg-muted/40 transition-colors group"
+                      onClick={() => navigate(`/app/admin/estudiantes/${s.user_id}`)}
+                    >
                       <TableCell className="font-body text-sm font-medium">
-                        {s.display_name || "—"}
+                        <span className="inline-flex items-center gap-1.5 group-hover:text-primary transition-colors">
+                          {s.display_name || "—"}
+                          <ChevronRight className="h-3.5 w-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                        </span>
                       </TableCell>
                       <TableCell className="font-body text-xs text-muted-foreground">
                         {fmtDate(s.joined_at)}
