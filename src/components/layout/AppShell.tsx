@@ -1,5 +1,7 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/AppSidebar";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { useEnsureDailyNotifications } from "@/hooks/useNotifications";
 import { ReactNode } from "react";
 
 interface AppShellProps {
@@ -10,6 +12,9 @@ interface AppShellProps {
 }
 
 export function AppShell({ title, subtitle, actions, children }: AppShellProps) {
+  // Genera vencimientos + sugerencia IA del día (idempotente).
+  useEnsureDailyNotifications();
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-secondary/30">
@@ -27,7 +32,10 @@ export function AppShell({ title, subtitle, actions, children }: AppShellProps) 
                 )}
               </div>
             </div>
-            {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
+            <div className="flex items-center gap-2 shrink-0">
+              {actions}
+              <NotificationBell />
+            </div>
           </header>
           <main className="flex-1 overflow-auto">{children}</main>
         </div>
