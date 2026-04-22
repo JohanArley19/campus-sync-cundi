@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AdminRoute } from "@/components/auth/AdminRoute";
+import { StudentRoute } from "@/components/auth/StudentRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -16,6 +17,7 @@ import Subjects from "./pages/Subjects";
 import Activities from "./pages/Activities";
 import Assistant from "./pages/Assistant";
 import Admin from "./pages/Admin";
+import AdminStudent from "./pages/AdminStudent";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,33 +38,33 @@ const App = () => (
             <Route
               path="/app"
               element={
-                <ProtectedRoute>
+                <StudentRoute>
                   <Index />
-                </ProtectedRoute>
+                </StudentRoute>
               }
             />
             <Route
               path="/app/materias"
               element={
-                <ProtectedRoute>
+                <StudentRoute>
                   <Subjects />
-                </ProtectedRoute>
+                </StudentRoute>
               }
             />
             <Route
               path="/app/actividades"
               element={
-                <ProtectedRoute>
+                <StudentRoute>
                   <Activities />
-                </ProtectedRoute>
+                </StudentRoute>
               }
             />
             <Route
               path="/app/asistente"
               element={
-                <ProtectedRoute>
+                <StudentRoute>
                   <Assistant />
-                </ProtectedRoute>
+                </StudentRoute>
               }
             />
             <Route
@@ -70,6 +72,14 @@ const App = () => (
               element={
                 <AdminRoute>
                   <Admin />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/app/admin/estudiantes/:userId"
+              element={
+                <AdminRoute>
+                  <AdminStudent />
                 </AdminRoute>
               }
             />
