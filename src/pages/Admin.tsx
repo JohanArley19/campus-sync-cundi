@@ -13,9 +13,12 @@ import {
 } from "recharts";
 import {
   Users, BookOpen, ListChecks, AlertTriangle, TrendingUp, Sparkles,
-  CheckCircle2, Clock, Activity as ActivityIcon, Award,
+  CheckCircle2, Clock, Activity as ActivityIcon, Award, FileDown, ChevronRight,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { downloadGlobalReportPdf } from "@/lib/adminReports";
+import { toast } from "sonner";
 
 type GlobalMetrics = {
   total_students: number;

@@ -139,6 +139,56 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          activity_id: string | null
+          body: string | null
+          created_at: string
+          dedupe_key: string
+          due_at: string | null
+          id: string
+          link: string | null
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          activity_id?: string | null
+          body?: string | null
+          created_at?: string
+          dedupe_key: string
+          due_at?: string | null
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          activity_id?: string | null
+          body?: string | null
+          created_at?: string
+          dedupe_key?: string
+          due_at?: string | null
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -224,6 +274,7 @@ export type Database = {
     Functions: {
       admin_exists: { Args: never; Returns: boolean }
       admin_global_metrics: { Args: never; Returns: Json }
+      admin_student_detail: { Args: { p_user_id: string }; Returns: Json }
       admin_student_overview: {
         Args: never
         Returns: {
@@ -259,6 +310,8 @@ export type Database = {
         }[]
       }
       bootstrap_first_admin: { Args: never; Returns: boolean }
+      generate_due_notifications_for_me: { Args: never; Returns: number }
+      has_ai_daily_today: { Args: never; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
