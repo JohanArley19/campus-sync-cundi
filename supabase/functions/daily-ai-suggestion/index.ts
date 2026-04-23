@@ -28,10 +28,11 @@ Deno.serve(async (req) => {
     const authHeader = req.headers.get("Authorization") ?? "";
     const token = authHeader.replace("Bearer ", "");
     if (!token) {
-      return new Response(JSON.stringify({ error: "No autenticado" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      // Sin token: no es un error real, simplemente no hay nada que hacer.
+      return new Response(
+        JSON.stringify({ created: false, reason: "no_session" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
     const supa = createClient(SUPABASE_URL, SUPABASE_ANON, {
@@ -40,10 +41,11 @@ Deno.serve(async (req) => {
 
     const { data: userData, error: userErr } = await supa.auth.getUser(token);
     if (userErr || !userData?.user) {
-      return new Response(JSON.stringify({ error: "Sesión inválida" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      // Token caducado o sesión cerrada: no es error, sólo salir limpio.
+      return new Response(
+        JSON.stringify({ created: false, reason: "invalid_session" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
     const userId = userData.user.id;
 
