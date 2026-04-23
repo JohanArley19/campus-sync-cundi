@@ -13,12 +13,18 @@ import {
 } from "recharts";
 import {
   Users, BookOpen, ListChecks, AlertTriangle, TrendingUp, Sparkles,
-  CheckCircle2, Clock, Activity as ActivityIcon, Award, FileDown, ChevronRight,
+  CheckCircle2, Activity as ActivityIcon, Award, FileDown, ChevronRight,
+  Flame, CalendarRange, Gauge,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { downloadGlobalReportPdf } from "@/lib/adminReports";
 import { toast } from "sonner";
+import { AdminHeader } from "@/components/admin/AdminHeader";
+import { Sparkline } from "@/components/admin/Sparkline";
+import { ActivityHeatmap } from "@/components/admin/ActivityHeatmap";
+import { ImpactComparison } from "@/components/admin/ImpactComparison";
+import { KpiSkeleton, PanelSkeleton, TableSkeleton } from "@/components/admin/AdminSkeletons";
 
 type GlobalMetrics = {
   total_students: number;
@@ -102,8 +108,65 @@ export default function Admin() {
     },
   });
 
+  const heatmapQ = useQuery({
+    queryKey: ["admin", "heatmap"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("admin_activity_heatmap");
+      if (error) throw error;
+      return (data ?? []) as Array<{ dow: number; hour: number; count: number }>;
+    },
+  });
+
+  const impactQ = useQuery({
+    queryKey: ["admin", "impact"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("admin_impact_comparison");
+      if (error) throw error;
+      return data as unknown as {
+        recent_completion_pct: number; prev_completion_pct: number;
+        recent_realizadas: number; prev_realizadas: number;
+        recent_active_students: number; prev_active_students: number;
+      };
+    },
+  });
+
+  const streaksQ = useQuery({
+    queryKey: ["admin", "streaks"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("admin_student_streaks");
+      if (error) throw error;
+      return (data ?? []) as Array<{
+        user_id: string; display_name: string | null;
+        current_streak: number; active_days_30d: number;
+      }>;
+    },
+  });
+
+  const sparkQ = useQuery({
+    queryKey: ["admin", "sparklines"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("admin_sparklines_14d");
+      if (error) throw error;
+      return data as unknown as {
+        completed: Array<{ d: string; v: number }>;
+        active: Array<{ d: string; v: number }>;
+        overdue: Array<{ d: string; v: number }>;
+      };
+    },
+  });
+
   const m = metricsQ.data;
   const students = studentsQ.data ?? [];
+  const streakById = useMemo(() => {
+    const map = new Map<string, number>();
+    (streaksQ.data ?? []).forEach((s) => map.set(s.user_id, s.current_streak));
+    return map;
+  }, [streaksQ.data]);
+
+  const topStreaks = useMemo(
+    () => (streaksQ.data ?? []).filter((s) => s.current_streak > 0).slice(0, 5),
+    [streaksQ.data],
+  );
 
   const topStudents = useMemo(
     () =>
@@ -190,67 +253,94 @@ export default function Admin() {
       <SEOHead title="Admin — CampusSync" description="Dashboard administrativo de CampusSync." />
 
       <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6 animate-fade-in">
-        {/* KPIs */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Kpi
-            icon={<Users className="h-4 w-4" />}
-            label="Estudiantes"
-            value={m?.total_students ?? 0}
-            hint={`${m?.new_students_30d ?? 0} nuevos · 30d`}
-            tone="primary"
-          />
-          <Kpi
-            icon={<ActivityIcon className="h-4 w-4" />}
-            label="Activos 7d"
-            value={m?.active_students_7d ?? 0}
-            hint={`${adoptionPct}% del total`}
-            tone="accent"
-          />
-          <Kpi
-            icon={<CheckCircle2 className="h-4 w-4" />}
-            label="Cumplimiento global"
-            value={`${m?.global_completion_pct ?? 0}%`}
-            hint={`${m?.realizadas ?? 0} realizadas`}
-            tone="success"
-          />
-          <Kpi
-            icon={<AlertTriangle className="h-4 w-4" />}
-            label="Vencidas"
-            value={m?.vencidas ?? 0}
-            hint={`${m?.pendientes ?? 0} pendientes`}
-            tone="destructive"
-          />
-          <Kpi
-            icon={<BookOpen className="h-4 w-4" />}
-            label="Materias creadas"
-            value={m?.total_subjects ?? 0}
-            tone="primary"
-          />
-          <Kpi
-            icon={<ListChecks className="h-4 w-4" />}
-            label="Actividades totales"
-            value={m?.total_activities ?? 0}
-            tone="primary"
-          />
-          <Kpi
-            icon={<Sparkles className="h-4 w-4" />}
-            label="Analizadas con IA"
-            value={`${m?.ai_analyzed_pct ?? 0}%`}
-            hint="Adopción de la IA"
-            tone="accent"
-          />
-          <Kpi
-            icon={<TrendingUp className="h-4 w-4" />}
-            label="Promedio por estudiante"
-            value={
-              m && m.total_students > 0
-                ? Math.round(m.total_activities / m.total_students)
-                : 0
-            }
-            hint="actividades / estudiante"
-            tone="primary"
-          />
-        </div>
+        {/* Hero institucional */}
+        <AdminHeader />
+
+        {/* KPIs con sparkline */}
+        {metricsQ.isLoading || !m ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {Array.from({ length: 4 }).map((_, i) => <KpiSkeleton key={i} />)}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <Kpi
+              icon={<Users className="h-4 w-4" />}
+              label="Estudiantes"
+              value={m.total_students}
+              hint={`${m.new_students_30d} nuevos · 30d`}
+              tone="primary"
+              spark={sparkQ.data?.active}
+              sparkColor="hsl(var(--primary))"
+            />
+            <Kpi
+              icon={<ActivityIcon className="h-4 w-4" />}
+              label="Activos 7d"
+              value={m.active_students_7d}
+              hint={`${adoptionPct}% del total`}
+              tone="accent"
+              spark={sparkQ.data?.active}
+              sparkColor="hsl(var(--accent))"
+            />
+            <Kpi
+              icon={<CheckCircle2 className="h-4 w-4" />}
+              label="Cumplimiento global"
+              value={`${m.global_completion_pct}%`}
+              hint={`${m.realizadas} realizadas`}
+              tone="success"
+              spark={sparkQ.data?.completed}
+              sparkColor="hsl(var(--success))"
+            />
+            <Kpi
+              icon={<AlertTriangle className="h-4 w-4" />}
+              label="Vencidas"
+              value={m.vencidas}
+              hint={`${m.pendientes} pendientes`}
+              tone="destructive"
+              spark={sparkQ.data?.overdue}
+              sparkColor="hsl(var(--destructive))"
+            />
+            <Kpi icon={<BookOpen className="h-4 w-4" />} label="Materias creadas" value={m.total_subjects} tone="primary" />
+            <Kpi icon={<ListChecks className="h-4 w-4" />} label="Actividades totales" value={m.total_activities} tone="primary" />
+            <Kpi icon={<Sparkles className="h-4 w-4" />} label="Analizadas con IA" value={`${m.ai_analyzed_pct}%`} hint="Adopción de la IA" tone="accent" />
+            <Kpi
+              icon={<TrendingUp className="h-4 w-4" />}
+              label="Promedio por estudiante"
+              value={m.total_students > 0 ? Math.round(m.total_activities / m.total_students) : 0}
+              hint="actividades / estudiante"
+              tone="primary"
+            />
+          </div>
+        )}
+
+        {/* Comparativa antes/después */}
+        <Panel
+          title="Impacto del aplicativo"
+          subtitle="Comparativa últimos 30 días vs 30 días previos"
+          icon={<Gauge className="h-4 w-4 text-primary" />}
+        >
+          {impactQ.isLoading ? (
+            <div className="space-y-2">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="h-10 bg-muted/40 rounded animate-pulse" />
+              ))}
+            </div>
+          ) : (
+            <ImpactComparison data={impactQ.data} />
+          )}
+        </Panel>
+
+        {/* Heatmap */}
+        <Panel
+          title="Mapa de calor de actividad"
+          subtitle="Cuándo entregan tareas los estudiantes (últimos 60 días, hora Bogotá)"
+          icon={<CalendarRange className="h-4 w-4 text-primary" />}
+        >
+          {heatmapQ.isLoading ? (
+            <div className="h-48 bg-muted/30 rounded animate-pulse" />
+          ) : (
+            <ActivityHeatmap data={heatmapQ.data ?? []} />
+          )}
+        </Panel>
 
         {/* Charts row */}
         <div className="grid lg:grid-cols-3 gap-4">
@@ -382,6 +472,54 @@ export default function Admin() {
           </Panel>
         </div>
 
+        {/* Rachas */}
+        <Panel
+          title="Estudiantes más constantes"
+          subtitle="Días consecutivos de uso del aplicativo"
+          icon={<Flame className="h-4 w-4 text-accent" />}
+        >
+          {streaksQ.isLoading ? (
+            <div className="h-32 bg-muted/30 rounded animate-pulse" />
+          ) : topStreaks.length === 0 ? (
+            <p className="font-body text-xs text-muted-foreground">
+              Aún no hay rachas registradas. Se contabilizan a partir del segundo día consecutivo de uso.
+            </p>
+          ) : (
+            <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {topStreaks.map((s, i) => (
+                <li
+                  key={s.user_id}
+                  className="rounded-lg border border-accent/30 bg-accent-soft/40 p-3 flex items-center gap-3 cursor-pointer hover:bg-accent-soft/60 transition-colors"
+                  onClick={() => navigate(`/app/admin/estudiantes/${s.user_id}`)}
+                >
+                  <div className="h-10 w-10 rounded-lg bg-accent text-accent-foreground flex items-center justify-center shrink-0 shadow-sm">
+                    <Flame className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-body text-sm font-semibold truncate">
+                      {i === 0 && "🥇 "}
+                      {i === 1 && "🥈 "}
+                      {i === 2 && "🥉 "}
+                      {s.display_name || "Estudiante"}
+                    </p>
+                    <p className="font-body text-[11px] text-muted-foreground">
+                      {s.active_days_30d} días activos · 30d
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="font-display text-xl font-bold text-accent leading-none">
+                      {s.current_streak}
+                    </p>
+                    <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wide">
+                      días
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Panel>
+
         <Panel
           title="Estudiantes en riesgo"
           subtitle="Con vencidas o cumplimiento < 50%"
@@ -413,7 +551,7 @@ export default function Admin() {
         {/* Tabla de estudiantes */}
         <Panel title={`Estudiantes registrados (${students.length})`} subtitle="Resumen individual">
           {studentsQ.isLoading ? (
-            <p className="font-body text-sm text-muted-foreground py-6 text-center">Cargando…</p>
+            <TableSkeleton />
           ) : students.length === 0 ? (
             <p className="font-body text-sm text-muted-foreground py-6 text-center">Aún no hay estudiantes registrados.</p>
           ) : (
@@ -427,46 +565,60 @@ export default function Admin() {
                     <TableHead className="font-body text-xs text-right">Actividades</TableHead>
                     <TableHead className="font-body text-xs text-right">Pendientes</TableHead>
                     <TableHead className="font-body text-xs text-right">Vencidas</TableHead>
+                    <TableHead className="font-body text-xs text-right">Racha</TableHead>
                     <TableHead className="font-body text-xs text-right">Cumplimiento</TableHead>
                     <TableHead className="font-body text-xs">Última actividad</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {students.map((s) => (
-                    <TableRow
-                      key={s.user_id}
-                      className="cursor-pointer hover:bg-muted/40 transition-colors group"
-                      onClick={() => navigate(`/app/admin/estudiantes/${s.user_id}`)}
-                    >
-                      <TableCell className="font-body text-sm font-medium">
-                        <span className="inline-flex items-center gap-1.5 group-hover:text-primary transition-colors">
-                          {s.display_name || "—"}
-                          <ChevronRight className="h-3.5 w-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                        </span>
-                      </TableCell>
-                      <TableCell className="font-body text-xs text-muted-foreground">
-                        {fmtDate(s.joined_at)}
-                      </TableCell>
-                      <TableCell className="font-body text-sm text-right">{s.subjects_count}</TableCell>
-                      <TableCell className="font-body text-sm text-right">{s.total_activities}</TableCell>
-                      <TableCell className="font-body text-sm text-right">
-                        <span className="text-accent font-semibold">{s.pendientes}</span>
-                      </TableCell>
-                      <TableCell className="font-body text-sm text-right">
-                        {s.vencidas > 0 ? (
-                          <span className="text-destructive font-semibold">{s.vencidas}</span>
-                        ) : (
-                          <span className="text-muted-foreground">0</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <CompletionPill pct={Number(s.completion_pct)} />
-                      </TableCell>
-                      <TableCell className="font-body text-xs text-muted-foreground">
-                        {fmtDate(s.last_activity_at)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {students.map((s) => {
+                    const streak = streakById.get(s.user_id) ?? 0;
+                    return (
+                      <TableRow
+                        key={s.user_id}
+                        className="cursor-pointer hover:bg-muted/40 transition-colors group"
+                        onClick={() => navigate(`/app/admin/estudiantes/${s.user_id}`)}
+                      >
+                        <TableCell className="font-body text-sm font-medium">
+                          <span className="inline-flex items-center gap-1.5 group-hover:text-primary transition-colors">
+                            {s.display_name || "—"}
+                            <ChevronRight className="h-3.5 w-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                          </span>
+                        </TableCell>
+                        <TableCell className="font-body text-xs text-muted-foreground">
+                          {fmtDate(s.joined_at)}
+                        </TableCell>
+                        <TableCell className="font-body text-sm text-right">{s.subjects_count}</TableCell>
+                        <TableCell className="font-body text-sm text-right">{s.total_activities}</TableCell>
+                        <TableCell className="font-body text-sm text-right">
+                          <span className="text-accent font-semibold">{s.pendientes}</span>
+                        </TableCell>
+                        <TableCell className="font-body text-sm text-right">
+                          {s.vencidas > 0 ? (
+                            <span className="text-destructive font-semibold">{s.vencidas}</span>
+                          ) : (
+                            <span className="text-muted-foreground">0</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="font-body text-sm text-right">
+                          {streak > 0 ? (
+                            <span className="inline-flex items-center gap-1 text-accent font-semibold">
+                              <Flame className="h-3 w-3" />
+                              {streak}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <CompletionPill pct={Number(s.completion_pct)} />
+                        </TableCell>
+                        <TableCell className="font-body text-xs text-muted-foreground">
+                          {fmtDate(s.last_activity_at)}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
@@ -489,12 +641,16 @@ function Kpi({
   value,
   hint,
   tone,
+  spark,
+  sparkColor,
 }: {
   icon: React.ReactNode;
   label: string;
   value: number | string;
   hint?: string;
   tone: "primary" | "accent" | "success" | "destructive";
+  spark?: Array<{ d?: string; v: number }>;
+  sparkColor?: string;
 }) {
   const toneCls = {
     primary: "bg-primary-soft text-primary",
@@ -503,7 +659,7 @@ function Kpi({
     destructive: "bg-destructive/10 text-destructive",
   }[tone];
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
+    <div className="rounded-xl border border-border bg-card p-4 hover:shadow-sm transition-shadow">
       <div className="flex items-center justify-between mb-2">
         <span className="font-body text-[11px] uppercase tracking-wide text-muted-foreground">
           {label}
@@ -514,6 +670,11 @@ function Kpi({
       </div>
       <p className="font-display text-2xl font-bold text-foreground leading-none">{value}</p>
       {hint && <p className="font-body text-[11px] text-muted-foreground mt-1">{hint}</p>}
+      {spark && spark.length > 0 && (
+        <div className="mt-2">
+          <Sparkline data={spark} color={sparkColor} />
+        </div>
+      )}
     </div>
   );
 }

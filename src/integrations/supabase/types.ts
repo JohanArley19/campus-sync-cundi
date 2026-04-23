@@ -272,8 +272,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_activity_heatmap: {
+        Args: never
+        Returns: {
+          count: number
+          dow: number
+          hour: number
+        }[]
+      }
       admin_exists: { Args: never; Returns: boolean }
       admin_global_metrics: { Args: never; Returns: Json }
+      admin_impact_comparison: { Args: never; Returns: Json }
+      admin_sparklines_14d: { Args: never; Returns: Json }
       admin_student_detail: { Args: { p_user_id: string }; Returns: Json }
       admin_student_overview: {
         Args: never
@@ -289,6 +299,15 @@ export type Database = {
           total_activities: number
           user_id: string
           vencidas: number
+        }[]
+      }
+      admin_student_streaks: {
+        Args: never
+        Returns: {
+          active_days_30d: number
+          current_streak: number
+          display_name: string
+          user_id: string
         }[]
       }
       admin_subject_distribution: {
