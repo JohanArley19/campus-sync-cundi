@@ -472,6 +472,54 @@ export default function Admin() {
           </Panel>
         </div>
 
+        {/* Rachas */}
+        <Panel
+          title="Estudiantes más constantes"
+          subtitle="Días consecutivos de uso del aplicativo"
+          icon={<Flame className="h-4 w-4 text-accent" />}
+        >
+          {streaksQ.isLoading ? (
+            <div className="h-32 bg-muted/30 rounded animate-pulse" />
+          ) : topStreaks.length === 0 ? (
+            <p className="font-body text-xs text-muted-foreground">
+              Aún no hay rachas registradas. Se contabilizan a partir del segundo día consecutivo de uso.
+            </p>
+          ) : (
+            <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {topStreaks.map((s, i) => (
+                <li
+                  key={s.user_id}
+                  className="rounded-lg border border-accent/30 bg-accent-soft/40 p-3 flex items-center gap-3 cursor-pointer hover:bg-accent-soft/60 transition-colors"
+                  onClick={() => navigate(`/app/admin/estudiantes/${s.user_id}`)}
+                >
+                  <div className="h-10 w-10 rounded-lg bg-accent text-accent-foreground flex items-center justify-center shrink-0 shadow-sm">
+                    <Flame className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-body text-sm font-semibold truncate">
+                      {i === 0 && "🥇 "}
+                      {i === 1 && "🥈 "}
+                      {i === 2 && "🥉 "}
+                      {s.display_name || "Estudiante"}
+                    </p>
+                    <p className="font-body text-[11px] text-muted-foreground">
+                      {s.active_days_30d} días activos · 30d
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="font-display text-xl font-bold text-accent leading-none">
+                      {s.current_streak}
+                    </p>
+                    <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wide">
+                      días
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Panel>
+
         <Panel
           title="Estudiantes en riesgo"
           subtitle="Con vencidas o cumplimiento < 50%"
@@ -503,7 +551,7 @@ export default function Admin() {
         {/* Tabla de estudiantes */}
         <Panel title={`Estudiantes registrados (${students.length})`} subtitle="Resumen individual">
           {studentsQ.isLoading ? (
-            <p className="font-body text-sm text-muted-foreground py-6 text-center">Cargando…</p>
+            <TableSkeleton />
           ) : students.length === 0 ? (
             <p className="font-body text-sm text-muted-foreground py-6 text-center">Aún no hay estudiantes registrados.</p>
           ) : (
@@ -517,46 +565,60 @@ export default function Admin() {
                     <TableHead className="font-body text-xs text-right">Actividades</TableHead>
                     <TableHead className="font-body text-xs text-right">Pendientes</TableHead>
                     <TableHead className="font-body text-xs text-right">Vencidas</TableHead>
+                    <TableHead className="font-body text-xs text-right">Racha</TableHead>
                     <TableHead className="font-body text-xs text-right">Cumplimiento</TableHead>
                     <TableHead className="font-body text-xs">Última actividad</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {students.map((s) => (
-                    <TableRow
-                      key={s.user_id}
-                      className="cursor-pointer hover:bg-muted/40 transition-colors group"
-                      onClick={() => navigate(`/app/admin/estudiantes/${s.user_id}`)}
-                    >
-                      <TableCell className="font-body text-sm font-medium">
-                        <span className="inline-flex items-center gap-1.5 group-hover:text-primary transition-colors">
-                          {s.display_name || "—"}
-                          <ChevronRight className="h-3.5 w-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                        </span>
-                      </TableCell>
-                      <TableCell className="font-body text-xs text-muted-foreground">
-                        {fmtDate(s.joined_at)}
-                      </TableCell>
-                      <TableCell className="font-body text-sm text-right">{s.subjects_count}</TableCell>
-                      <TableCell className="font-body text-sm text-right">{s.total_activities}</TableCell>
-                      <TableCell className="font-body text-sm text-right">
-                        <span className="text-accent font-semibold">{s.pendientes}</span>
-                      </TableCell>
-                      <TableCell className="font-body text-sm text-right">
-                        {s.vencidas > 0 ? (
-                          <span className="text-destructive font-semibold">{s.vencidas}</span>
-                        ) : (
-                          <span className="text-muted-foreground">0</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <CompletionPill pct={Number(s.completion_pct)} />
-                      </TableCell>
-                      <TableCell className="font-body text-xs text-muted-foreground">
-                        {fmtDate(s.last_activity_at)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {students.map((s) => {
+                    const streak = streakById.get(s.user_id) ?? 0;
+                    return (
+                      <TableRow
+                        key={s.user_id}
+                        className="cursor-pointer hover:bg-muted/40 transition-colors group"
+                        onClick={() => navigate(`/app/admin/estudiantes/${s.user_id}`)}
+                      >
+                        <TableCell className="font-body text-sm font-medium">
+                          <span className="inline-flex items-center gap-1.5 group-hover:text-primary transition-colors">
+                            {s.display_name || "—"}
+                            <ChevronRight className="h-3.5 w-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                          </span>
+                        </TableCell>
+                        <TableCell className="font-body text-xs text-muted-foreground">
+                          {fmtDate(s.joined_at)}
+                        </TableCell>
+                        <TableCell className="font-body text-sm text-right">{s.subjects_count}</TableCell>
+                        <TableCell className="font-body text-sm text-right">{s.total_activities}</TableCell>
+                        <TableCell className="font-body text-sm text-right">
+                          <span className="text-accent font-semibold">{s.pendientes}</span>
+                        </TableCell>
+                        <TableCell className="font-body text-sm text-right">
+                          {s.vencidas > 0 ? (
+                            <span className="text-destructive font-semibold">{s.vencidas}</span>
+                          ) : (
+                            <span className="text-muted-foreground">0</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="font-body text-sm text-right">
+                          {streak > 0 ? (
+                            <span className="inline-flex items-center gap-1 text-accent font-semibold">
+                              <Flame className="h-3 w-3" />
+                              {streak}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <CompletionPill pct={Number(s.completion_pct)} />
+                        </TableCell>
+                        <TableCell className="font-body text-xs text-muted-foreground">
+                          {fmtDate(s.last_activity_at)}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
@@ -579,12 +641,16 @@ function Kpi({
   value,
   hint,
   tone,
+  spark,
+  sparkColor,
 }: {
   icon: React.ReactNode;
   label: string;
   value: number | string;
   hint?: string;
   tone: "primary" | "accent" | "success" | "destructive";
+  spark?: Array<{ d?: string; v: number }>;
+  sparkColor?: string;
 }) {
   const toneCls = {
     primary: "bg-primary-soft text-primary",
@@ -593,7 +659,7 @@ function Kpi({
     destructive: "bg-destructive/10 text-destructive",
   }[tone];
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
+    <div className="rounded-xl border border-border bg-card p-4 hover:shadow-sm transition-shadow">
       <div className="flex items-center justify-between mb-2">
         <span className="font-body text-[11px] uppercase tracking-wide text-muted-foreground">
           {label}
@@ -604,6 +670,11 @@ function Kpi({
       </div>
       <p className="font-display text-2xl font-bold text-foreground leading-none">{value}</p>
       {hint && <p className="font-body text-[11px] text-muted-foreground mt-1">{hint}</p>}
+      {spark && spark.length > 0 && (
+        <div className="mt-2">
+          <Sparkline data={spark} color={sparkColor} />
+        </div>
+      )}
     </div>
   );
 }
