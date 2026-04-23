@@ -108,8 +108,65 @@ export default function Admin() {
     },
   });
 
+  const heatmapQ = useQuery({
+    queryKey: ["admin", "heatmap"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("admin_activity_heatmap");
+      if (error) throw error;
+      return (data ?? []) as Array<{ dow: number; hour: number; count: number }>;
+    },
+  });
+
+  const impactQ = useQuery({
+    queryKey: ["admin", "impact"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("admin_impact_comparison");
+      if (error) throw error;
+      return data as unknown as {
+        recent_completion_pct: number; prev_completion_pct: number;
+        recent_realizadas: number; prev_realizadas: number;
+        recent_active_students: number; prev_active_students: number;
+      };
+    },
+  });
+
+  const streaksQ = useQuery({
+    queryKey: ["admin", "streaks"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("admin_student_streaks");
+      if (error) throw error;
+      return (data ?? []) as Array<{
+        user_id: string; display_name: string | null;
+        current_streak: number; active_days_30d: number;
+      }>;
+    },
+  });
+
+  const sparkQ = useQuery({
+    queryKey: ["admin", "sparklines"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("admin_sparklines_14d");
+      if (error) throw error;
+      return data as unknown as {
+        completed: Array<{ d: string; v: number }>;
+        active: Array<{ d: string; v: number }>;
+        overdue: Array<{ d: string; v: number }>;
+      };
+    },
+  });
+
   const m = metricsQ.data;
   const students = studentsQ.data ?? [];
+  const streakById = useMemo(() => {
+    const map = new Map<string, number>();
+    (streaksQ.data ?? []).forEach((s) => map.set(s.user_id, s.current_streak));
+    return map;
+  }, [streaksQ.data]);
+
+  const topStreaks = useMemo(
+    () => (streaksQ.data ?? []).filter((s) => s.current_streak > 0).slice(0, 5),
+    [streaksQ.data],
+  );
 
   const topStudents = useMemo(
     () =>
