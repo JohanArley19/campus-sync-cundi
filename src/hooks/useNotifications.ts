@@ -72,28 +72,26 @@ export function useMarkAllNotificationsRead() {
  * Se ejecuta una vez por sesión cuando el usuario abre la app.
  */
 export function useEnsureDailyNotifications() {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const qc = useQueryClient();
   const ranRef = useRef(false);
 
   useEffect(() => {
-    if (!user || ranRef.current) return;
+    if (!user || !session?.access_token || ranRef.current) return;
     ranRef.current = true;
 
     (async () => {
       try {
-        // 1) Notificaciones de vencimientos (RPC en DB)
         await supabase.rpc("generate_due_notifications_for_me");
       } catch {
         /* noop */
       }
       try {
-        // 2) Sugerencia IA del día (edge function)
         await supabase.functions.invoke("daily-ai-suggestion");
       } catch {
-        /* noop */
+        /* noop: sesión expirada o fallo de red, no rompe la UI */
       }
       qc.invalidateQueries({ queryKey: ["notifications"] });
     })();
-  }, [user, qc]);
+  }, [user, session, qc]);
 }
