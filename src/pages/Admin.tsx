@@ -13,12 +13,18 @@ import {
 } from "recharts";
 import {
   Users, BookOpen, ListChecks, AlertTriangle, TrendingUp, Sparkles,
-  CheckCircle2, Clock, Activity as ActivityIcon, Award, FileDown, ChevronRight,
+  CheckCircle2, Activity as ActivityIcon, Award, FileDown, ChevronRight,
+  Flame, CalendarRange, Gauge,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { downloadGlobalReportPdf } from "@/lib/adminReports";
 import { toast } from "sonner";
+import { AdminHeader } from "@/components/admin/AdminHeader";
+import { Sparkline } from "@/components/admin/Sparkline";
+import { ActivityHeatmap } from "@/components/admin/ActivityHeatmap";
+import { ImpactComparison } from "@/components/admin/ImpactComparison";
+import { KpiSkeleton, PanelSkeleton, TableSkeleton } from "@/components/admin/AdminSkeletons";
 
 type GlobalMetrics = {
   total_students: number;
