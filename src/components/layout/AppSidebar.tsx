@@ -1,4 +1,4 @@
-import { GraduationCap, LogOut, BookOpen, ListChecks, LayoutDashboard, Shield } from "lucide-react";
+import { GraduationCap, LogOut, BookOpen, ListChecks, LayoutDashboard, Shield, Sparkles } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -21,6 +21,7 @@ const STUDENT_NAV = [
   { title: "Dashboard", url: "/app", icon: LayoutDashboard, end: true },
   { title: "Materias", url: "/app/materias", icon: BookOpen, end: false },
   { title: "Actividades", url: "/app/actividades", icon: ListChecks, end: false },
+  { title: "Asistente IA", url: "/app/asistente", icon: Sparkles, end: false },
 ];
 
 const ADMIN_NAV = [
