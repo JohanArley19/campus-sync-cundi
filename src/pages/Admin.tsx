@@ -253,67 +253,94 @@ export default function Admin() {
       <SEOHead title="Admin — CampusSync" description="Dashboard administrativo de CampusSync." />
 
       <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6 animate-fade-in">
-        {/* KPIs */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Kpi
-            icon={<Users className="h-4 w-4" />}
-            label="Estudiantes"
-            value={m?.total_students ?? 0}
-            hint={`${m?.new_students_30d ?? 0} nuevos · 30d`}
-            tone="primary"
-          />
-          <Kpi
-            icon={<ActivityIcon className="h-4 w-4" />}
-            label="Activos 7d"
-            value={m?.active_students_7d ?? 0}
-            hint={`${adoptionPct}% del total`}
-            tone="accent"
-          />
-          <Kpi
-            icon={<CheckCircle2 className="h-4 w-4" />}
-            label="Cumplimiento global"
-            value={`${m?.global_completion_pct ?? 0}%`}
-            hint={`${m?.realizadas ?? 0} realizadas`}
-            tone="success"
-          />
-          <Kpi
-            icon={<AlertTriangle className="h-4 w-4" />}
-            label="Vencidas"
-            value={m?.vencidas ?? 0}
-            hint={`${m?.pendientes ?? 0} pendientes`}
-            tone="destructive"
-          />
-          <Kpi
-            icon={<BookOpen className="h-4 w-4" />}
-            label="Materias creadas"
-            value={m?.total_subjects ?? 0}
-            tone="primary"
-          />
-          <Kpi
-            icon={<ListChecks className="h-4 w-4" />}
-            label="Actividades totales"
-            value={m?.total_activities ?? 0}
-            tone="primary"
-          />
-          <Kpi
-            icon={<Sparkles className="h-4 w-4" />}
-            label="Analizadas con IA"
-            value={`${m?.ai_analyzed_pct ?? 0}%`}
-            hint="Adopción de la IA"
-            tone="accent"
-          />
-          <Kpi
-            icon={<TrendingUp className="h-4 w-4" />}
-            label="Promedio por estudiante"
-            value={
-              m && m.total_students > 0
-                ? Math.round(m.total_activities / m.total_students)
-                : 0
-            }
-            hint="actividades / estudiante"
-            tone="primary"
-          />
-        </div>
+        {/* Hero institucional */}
+        <AdminHeader />
+
+        {/* KPIs con sparkline */}
+        {metricsQ.isLoading || !m ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {Array.from({ length: 4 }).map((_, i) => <KpiSkeleton key={i} />)}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <Kpi
+              icon={<Users className="h-4 w-4" />}
+              label="Estudiantes"
+              value={m.total_students}
+              hint={`${m.new_students_30d} nuevos · 30d`}
+              tone="primary"
+              spark={sparkQ.data?.active}
+              sparkColor="hsl(var(--primary))"
+            />
+            <Kpi
+              icon={<ActivityIcon className="h-4 w-4" />}
+              label="Activos 7d"
+              value={m.active_students_7d}
+              hint={`${adoptionPct}% del total`}
+              tone="accent"
+              spark={sparkQ.data?.active}
+              sparkColor="hsl(var(--accent))"
+            />
+            <Kpi
+              icon={<CheckCircle2 className="h-4 w-4" />}
+              label="Cumplimiento global"
+              value={`${m.global_completion_pct}%`}
+              hint={`${m.realizadas} realizadas`}
+              tone="success"
+              spark={sparkQ.data?.completed}
+              sparkColor="hsl(var(--success))"
+            />
+            <Kpi
+              icon={<AlertTriangle className="h-4 w-4" />}
+              label="Vencidas"
+              value={m.vencidas}
+              hint={`${m.pendientes} pendientes`}
+              tone="destructive"
+              spark={sparkQ.data?.overdue}
+              sparkColor="hsl(var(--destructive))"
+            />
+            <Kpi icon={<BookOpen className="h-4 w-4" />} label="Materias creadas" value={m.total_subjects} tone="primary" />
+            <Kpi icon={<ListChecks className="h-4 w-4" />} label="Actividades totales" value={m.total_activities} tone="primary" />
+            <Kpi icon={<Sparkles className="h-4 w-4" />} label="Analizadas con IA" value={`${m.ai_analyzed_pct}%`} hint="Adopción de la IA" tone="accent" />
+            <Kpi
+              icon={<TrendingUp className="h-4 w-4" />}
+              label="Promedio por estudiante"
+              value={m.total_students > 0 ? Math.round(m.total_activities / m.total_students) : 0}
+              hint="actividades / estudiante"
+              tone="primary"
+            />
+          </div>
+        )}
+
+        {/* Comparativa antes/después */}
+        <Panel
+          title="Impacto del aplicativo"
+          subtitle="Comparativa últimos 30 días vs 30 días previos"
+          icon={<Gauge className="h-4 w-4 text-primary" />}
+        >
+          {impactQ.isLoading ? (
+            <div className="space-y-2">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="h-10 bg-muted/40 rounded animate-pulse" />
+              ))}
+            </div>
+          ) : (
+            <ImpactComparison data={impactQ.data} />
+          )}
+        </Panel>
+
+        {/* Heatmap */}
+        <Panel
+          title="Mapa de calor de actividad"
+          subtitle="Cuándo entregan tareas los estudiantes (últimos 60 días, hora Bogotá)"
+          icon={<CalendarRange className="h-4 w-4 text-primary" />}
+        >
+          {heatmapQ.isLoading ? (
+            <div className="h-48 bg-muted/30 rounded animate-pulse" />
+          ) : (
+            <ActivityHeatmap data={heatmapQ.data ?? []} />
+          )}
+        </Panel>
 
         {/* Charts row */}
         <div className="grid lg:grid-cols-3 gap-4">
