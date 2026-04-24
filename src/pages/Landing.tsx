@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import SEOHead from "@/components/SEOHead";
+import InteractiveDemo from "@/components/landing/InteractiveDemo";
 import {
   GraduationCap,
   ArrowRight,
