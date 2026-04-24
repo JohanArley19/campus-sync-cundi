@@ -258,6 +258,17 @@ export default function Admin() {
         {/* Hero institucional */}
         <AdminHeader />
 
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="bg-card border border-border">
+            <TabsTrigger value="overview" className="font-body gap-1.5">
+              <LayoutDashboard className="h-3.5 w-3.5" /> Resumen
+            </TabsTrigger>
+            <TabsTrigger value="ai-training" className="font-body gap-1.5">
+              <Brain className="h-3.5 w-3.5" /> Entrenamiento IA
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-6 mt-0">
         {/* KPIs con sparkline */}
         {metricsQ.isLoading || !m ? (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
