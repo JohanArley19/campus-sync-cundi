@@ -146,29 +146,8 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Objetivos */}
-      <section className="px-6 py-20">
-        <div className="mx-auto max-w-4xl">
-          <div className="text-center mb-12">
-            <span className="font-body text-xs uppercase tracking-widest text-accent font-semibold">
-              Objetivos del proyecto
-            </span>
-            <h2 className="mt-2 font-display text-3xl sm:text-4xl font-bold text-foreground">
-              Cinco metas, una solución integral
-            </h2>
-          </div>
-          <ol className="space-y-4">
-            {OBJECTIVES.map((o) => (
-              <li key={o.n} className="flex items-start gap-5 rounded-xl border border-border bg-card p-5">
-                <span className="font-display text-2xl font-black text-primary/80 shrink-0 leading-none mt-0.5">
-                  {o.n}
-                </span>
-                <p className="font-body text-base text-foreground leading-relaxed">{o.text}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
+      {/* Demo interactiva (reemplaza la lista de objetivos) */}
+      <InteractiveDemo />
 
       {/* CTA */}
       <section className="px-6 py-20 bg-primary text-primary-foreground">
