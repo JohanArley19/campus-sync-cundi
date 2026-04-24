@@ -14,7 +14,7 @@ import {
 import {
   Users, BookOpen, ListChecks, AlertTriangle, TrendingUp, Sparkles,
   CheckCircle2, Activity as ActivityIcon, Award, FileDown, ChevronRight,
-  Flame, CalendarRange, Gauge,
+  Flame, CalendarRange, Gauge, Brain, LayoutDashboard,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,8 @@ import { Sparkline } from "@/components/admin/Sparkline";
 import { ActivityHeatmap } from "@/components/admin/ActivityHeatmap";
 import { ImpactComparison } from "@/components/admin/ImpactComparison";
 import { KpiSkeleton, PanelSkeleton, TableSkeleton } from "@/components/admin/AdminSkeletons";
+import { AITraining } from "@/components/admin/AITraining";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type GlobalMetrics = {
   total_students: number;
@@ -256,6 +258,17 @@ export default function Admin() {
         {/* Hero institucional */}
         <AdminHeader />
 
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="bg-card border border-border">
+            <TabsTrigger value="overview" className="font-body gap-1.5">
+              <LayoutDashboard className="h-3.5 w-3.5" /> Resumen
+            </TabsTrigger>
+            <TabsTrigger value="ai-training" className="font-body gap-1.5">
+              <Brain className="h-3.5 w-3.5" /> Entrenamiento IA
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-6 mt-0">
         {/* KPIs con sparkline */}
         {metricsQ.isLoading || !m ? (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -628,6 +641,12 @@ export default function Admin() {
         <p className="text-center font-body text-xs text-muted-foreground pt-2">
           Vista solo de lectura · <Link to="/app" className="text-primary hover:underline">Volver al dashboard</Link>
         </p>
+          </TabsContent>
+
+          <TabsContent value="ai-training" className="mt-0">
+            <AITraining />
+          </TabsContent>
+        </Tabs>
       </div>
     </AppShell>
   );
