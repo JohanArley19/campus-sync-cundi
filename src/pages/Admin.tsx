@@ -25,6 +25,9 @@ import { Sparkline } from "@/components/admin/Sparkline";
 import { ActivityHeatmap } from "@/components/admin/ActivityHeatmap";
 import { ImpactComparison } from "@/components/admin/ImpactComparison";
 import { KpiSkeleton, PanelSkeleton, TableSkeleton } from "@/components/admin/AdminSkeletons";
+import { AITraining } from "@/components/admin/AITraining";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Brain, LayoutDashboard } from "lucide-react";
 
 type GlobalMetrics = {
   total_students: number;
