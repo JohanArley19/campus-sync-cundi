@@ -22,7 +22,7 @@ import { downloadGlobalReportPdf } from "@/lib/adminReports";
 import { toast } from "sonner";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { Sparkline } from "@/components/admin/Sparkline";
-import { ActivityHeatmap } from "@/components/admin/ActivityHeatmap";
+
 import { ImpactComparison } from "@/components/admin/ImpactComparison";
 import { KpiSkeleton, PanelSkeleton, TableSkeleton } from "@/components/admin/AdminSkeletons";
 import { AITraining } from "@/components/admin/AITraining";
@@ -110,14 +110,6 @@ export default function Admin() {
     },
   });
 
-  const heatmapQ = useQuery({
-    queryKey: ["admin", "heatmap"],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc("admin_activity_heatmap");
-      if (error) throw error;
-      return (data ?? []) as Array<{ dow: number; hour: number; count: number }>;
-    },
-  });
 
   const impactQ = useQuery({
     queryKey: ["admin", "impact"],
@@ -339,19 +331,6 @@ export default function Admin() {
             </div>
           ) : (
             <ImpactComparison data={impactQ.data} />
-          )}
-        </Panel>
-
-        {/* Heatmap */}
-        <Panel
-          title="Mapa de calor de actividad"
-          subtitle="Cuándo entregan tareas los estudiantes (últimos 60 días, hora Bogotá)"
-          icon={<CalendarRange className="h-4 w-4 text-primary" />}
-        >
-          {heatmapQ.isLoading ? (
-            <div className="h-48 bg-muted/30 rounded animate-pulse" />
-          ) : (
-            <ActivityHeatmap data={heatmapQ.data ?? []} />
           )}
         </Panel>
 
