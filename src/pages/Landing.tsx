@@ -46,13 +46,8 @@ const FEATURES = [
   },
 ];
 
-const OBJECTIVES = [
-  { n: "01", text: "Diseñar un sistema de autenticación seguro." },
-  { n: "02", text: "Desarrollar un módulo de gestión académica completo." },
-  { n: "03", text: "Implementar un modelo de IA para priorización." },
-  { n: "04", text: "Integrar un dashboard interactivo de métricas." },
-  { n: "05", text: "Desplegar en un entorno de nube escalable." },
-];
+
+
 
 export default function Landing() {
   return (
