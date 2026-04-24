@@ -14,7 +14,7 @@ import {
 import {
   Users, BookOpen, ListChecks, AlertTriangle, TrendingUp, Sparkles,
   CheckCircle2, Activity as ActivityIcon, Award, FileDown, ChevronRight,
-  Flame, CalendarRange, Gauge,
+  Flame, CalendarRange, Gauge, Brain, LayoutDashboard,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,6 @@ import { ImpactComparison } from "@/components/admin/ImpactComparison";
 import { KpiSkeleton, PanelSkeleton, TableSkeleton } from "@/components/admin/AdminSkeletons";
 import { AITraining } from "@/components/admin/AITraining";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Brain, LayoutDashboard } from "lucide-react";
 
 type GlobalMetrics = {
   total_students: number;
