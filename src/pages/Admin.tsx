@@ -641,6 +641,12 @@ export default function Admin() {
         <p className="text-center font-body text-xs text-muted-foreground pt-2">
           Vista solo de lectura · <Link to="/app" className="text-primary hover:underline">Volver al dashboard</Link>
         </p>
+          </TabsContent>
+
+          <TabsContent value="ai-training" className="mt-0">
+            <AITraining />
+          </TabsContent>
+        </Tabs>
       </div>
     </AppShell>
   );
