@@ -248,7 +248,12 @@ export default function Admin() {
 
       <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6 animate-fade-in">
         {/* Hero institucional */}
-        <AdminHeader />
+        <AdminHeader
+          totalStudents={m?.total_students}
+          activeStudents7d={m?.active_students_7d}
+          globalCompletionPct={m?.global_completion_pct}
+          vencidas={m?.vencidas}
+        />
 
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="bg-card border border-border">
