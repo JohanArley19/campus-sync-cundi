@@ -301,6 +301,18 @@ export type Database = {
           vencidas: number
         }[]
       }
+      admin_student_pending_activities: {
+        Args: { p_user_id: string }
+        Returns: {
+          active_load: number
+          activity_id: string
+          due_date: string
+          history_pct: number
+          priority: Database["public"]["Enums"]["activity_priority"]
+          subject_name: string
+          title: string
+        }[]
+      }
       admin_student_streaks: {
         Args: never
         Returns: {
