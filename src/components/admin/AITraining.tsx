@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -6,12 +6,18 @@ import {
 import {
   Brain, Cpu, Database, Play, Activity, Target, CheckCircle2, XCircle,
   Layers, Zap, Info, Sparkles, TrendingDown, TrendingUp, RotateCcw,
+  UserSearch, Calendar, AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import {
   buildRealSamples,
   trainModel,
+  buildFeaturesForPending,
+  predictWithModel,
   type EpochLog,
   type TrainingResult,
   type RealActivity,
