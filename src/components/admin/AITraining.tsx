@@ -498,6 +498,9 @@ export function AITraining() {
               </table>
             </div>
           </Section>
+
+          {/* ============ CARD 6: Predicción individual por estudiante ============ */}
+          <StudentPrediction model={result.model} />
         </>
       )}
     </div>
