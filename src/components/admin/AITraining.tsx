@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -6,12 +6,18 @@ import {
 import {
   Brain, Cpu, Database, Play, Activity, Target, CheckCircle2, XCircle,
   Layers, Zap, Info, Sparkles, TrendingDown, TrendingUp, RotateCcw,
+  UserSearch, Calendar, AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import {
   buildRealSamples,
   trainModel,
+  buildFeaturesForPending,
+  predictWithModel,
   type EpochLog,
   type TrainingResult,
   type RealActivity,
@@ -492,6 +498,9 @@ export function AITraining() {
               </table>
             </div>
           </Section>
+
+          {/* ============ CARD 6: Predicción individual por estudiante ============ */}
+          <StudentPrediction model={result.model} />
         </>
       )}
     </div>
@@ -704,6 +713,198 @@ function ConfusionMatrixView({ result }: { result: TrainingResult }) {
       </div>
       {cell(fp, "Falso positivo", false, "Falló: no fue realizada")}
       {cell(tn, "Verdadero negativo", true, "Acertó: no fue realizada")}
+    </div>
+  );
+}
+
+/* ---------- Predicción individual por estudiante ---------- */
+
+import type * as tf from "@tensorflow/tfjs";
+
+type StudentLite = { user_id: string; display_name: string | null; pendientes: number };
+type PendingActivity = {
+  activity_id: string;
+  title: string;
+  subject_name: string | null;
+  priority: "baja" | "media" | "alta";
+  due_date: string | null;
+  active_load: number;
+  history_pct: number;
+};
+
+function StudentPrediction({ model }: { model: tf.LayersModel }) {
+  const [studentId, setStudentId] = useState<string>("");
+
+  const studentsQ = useQuery({
+    queryKey: ["admin", "students-for-prediction"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("admin_student_overview");
+      if (error) throw error;
+      return ((data ?? []) as Array<{ user_id: string; display_name: string | null; pendientes: number }>)
+        .filter((s) => s.pendientes > 0)
+        .map((s) => ({
+          user_id: s.user_id,
+          display_name: s.display_name,
+          pendientes: s.pendientes,
+        })) as StudentLite[];
+    },
+  });
+
+  const pendingQ = useQuery({
+    queryKey: ["admin", "student-pending", studentId],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("admin_student_pending_activities", {
+        p_user_id: studentId,
+      });
+      if (error) throw error;
+      return (data ?? []) as PendingActivity[];
+    },
+    enabled: !!studentId,
+  });
+
+  const predictions = useMemo(() => {
+    if (!pendingQ.data) return [];
+    return pendingQ.data.map((act) => {
+      const features = buildFeaturesForPending({
+        due_date: act.due_date,
+        priority: act.priority,
+        active_load: act.active_load,
+        history_pct: Number(act.history_pct),
+      });
+      const prob = predictWithModel(model, features);
+      return { ...act, prob };
+    });
+  }, [pendingQ.data, model]);
+
+  const selected = studentsQ.data?.find((s) => s.user_id === studentId);
+
+  return (
+    <Section
+      title="Predicción individual por estudiante"
+      subtitle="Usa el modelo entrenado para estimar si un estudiante específico entregará cada actividad pendiente"
+      icon={<UserSearch className="h-4 w-4 text-primary" />}
+    >
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
+          <div className="flex-1">
+            <label className="font-body text-[11px] uppercase tracking-wide text-muted-foreground mb-1.5 block">
+              Estudiante
+            </label>
+            <Select value={studentId} onValueChange={setStudentId}>
+              <SelectTrigger className="font-body">
+                <SelectValue placeholder="Selecciona un estudiante con actividades pendientes…" />
+              </SelectTrigger>
+              <SelectContent>
+                {studentsQ.isLoading && (
+                  <div className="px-2 py-3 text-xs font-body text-muted-foreground">Cargando…</div>
+                )}
+                {!studentsQ.isLoading && (studentsQ.data ?? []).length === 0 && (
+                  <div className="px-2 py-3 text-xs font-body text-muted-foreground">
+                    No hay estudiantes con actividades pendientes.
+                  </div>
+                )}
+                {(studentsQ.data ?? []).map((s) => (
+                  <SelectItem key={s.user_id} value={s.user_id}>
+                    {s.display_name || "Estudiante"} · {s.pendientes} pendientes
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {selected && predictions.length > 0 && (
+            <div className="rounded-lg border border-border bg-muted/30 px-3 py-2.5">
+              <p className="font-body text-[10px] uppercase tracking-wide text-muted-foreground">
+                Promedio estudiante
+              </p>
+              <p className="font-display text-xl font-bold text-foreground tabular-nums">
+                {(
+                  (predictions.reduce((acc, p) => acc + p.prob, 0) / predictions.length) *
+                  100
+                ).toFixed(0)}
+                %
+              </p>
+            </div>
+          )}
+        </div>
+
+        {!studentId && (
+          <div className="rounded-lg border border-dashed border-border bg-muted/20 p-6 text-center">
+            <UserSearch className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
+            <p className="font-body text-sm text-muted-foreground">
+              Selecciona un estudiante para ver la predicción de cada una de sus actividades pendientes.
+            </p>
+          </div>
+        )}
+
+        {studentId && pendingQ.isLoading && (
+          <p className="font-body text-xs text-muted-foreground">Calculando predicciones…</p>
+        )}
+
+        {studentId && !pendingQ.isLoading && predictions.length === 0 && (
+          <div className="rounded-lg border border-dashed border-border bg-muted/20 p-6 text-center">
+            <p className="font-body text-sm text-muted-foreground">
+              Este estudiante no tiene actividades pendientes.
+            </p>
+          </div>
+        )}
+
+        {predictions.length > 0 && (
+          <div className="space-y-2">
+            {predictions
+              .sort((a, b) => a.prob - b.prob)
+              .map((p) => (
+                <PredictionRow key={p.activity_id} item={p} />
+              ))}
+          </div>
+        )}
+
+        <Hint>
+          Esta predicción usa el mismo modelo recién entrenado y se calcula 100% en tu navegador. La
+          probabilidad combina los días que faltan, prioridad, carga actual del estudiante e
+          historial previo de cumplimiento.
+        </Hint>
+      </div>
+    </Section>
+  );
+}
+
+function PredictionRow({ item }: { item: PendingActivity & { prob: number } }) {
+  const pct = Math.round(item.prob * 100);
+  const tone =
+    pct >= 70
+      ? { bg: "bg-success/10", text: "text-success", border: "border-success/30", label: "Probable entrega" }
+      : pct >= 40
+        ? { bg: "bg-accent/10", text: "text-accent", border: "border-accent/30", label: "Riesgo medio" }
+        : { bg: "bg-destructive/10", text: "text-destructive", border: "border-destructive/30", label: "Alto riesgo" };
+
+  const dueLabel = item.due_date
+    ? new Date(item.due_date).toLocaleDateString("es-CO", { day: "2-digit", month: "short" })
+    : "Sin fecha";
+  const isOverdue = item.due_date && new Date(item.due_date).getTime() < Date.now();
+
+  return (
+    <div className={`rounded-lg border ${tone.border} ${tone.bg} p-3 flex items-center gap-3`}>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-0.5">
+          <p className="font-body text-sm font-semibold text-foreground truncate">{item.title}</p>
+          {isOverdue && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-body uppercase tracking-wide text-destructive">
+              <AlertTriangle className="h-3 w-3" /> Vencida
+            </span>
+          )}
+        </div>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 font-body text-[11px] text-muted-foreground">
+          <span className="truncate">{item.subject_name || "Sin materia"}</span>
+          <span className="inline-flex items-center gap-1">
+            <Calendar className="h-3 w-3" /> {dueLabel}
+          </span>
+          <span className="capitalize">Prioridad {item.priority}</span>
+        </div>
+      </div>
+      <div className="shrink-0 text-right">
+        <p className={`font-display text-2xl font-bold tabular-nums ${tone.text}`}>{pct}%</p>
+        <p className={`font-body text-[10px] uppercase tracking-wide ${tone.text}`}>{tone.label}</p>
+      </div>
     </div>
   );
 }

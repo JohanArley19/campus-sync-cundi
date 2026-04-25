@@ -45,7 +45,39 @@ export type TrainingResult = {
   testCount: number;
   durationMs: number;
   epochs: number;
+  model: tf.LayersModel; // modelo entrenado, listo para predecir
 };
+
+/** Construye las 5 features para una actividad pendiente concreta. */
+export function buildFeaturesForPending(input: {
+  due_date: string | null;
+  priority: "baja" | "media" | "alta";
+  active_load: number;
+  history_pct: number;
+}): number[] {
+  const now = Date.now();
+  const days = input.due_date
+    ? Math.round((new Date(input.due_date).getTime() - now) / 86400000)
+    : 7;
+  const overdue = input.due_date && new Date(input.due_date).getTime() < now ? 1 : 0;
+  return [
+    Math.max(-30, Math.min(60, days)) / 60,
+    PRIO_MAP[input.priority] ?? 0.5,
+    Math.min(input.active_load, 20) / 20,
+    Math.max(0, Math.min(1, input.history_pct)),
+    overdue,
+  ];
+}
+
+/** Predice probabilidad (0..1) de que una actividad sea entregada. */
+export function predictWithModel(model: tf.LayersModel, features: number[]): number {
+  const x = tf.tensor2d([features]);
+  const out = model.predict(x) as tf.Tensor;
+  const v = out.dataSync()[0];
+  x.dispose();
+  out.dispose();
+  return v;
+}
 
 // ---------- Generación de dataset sintético ----------
 
@@ -254,12 +286,11 @@ export async function trainModel(opts: {
   const recall = tp / Math.max(1, tp + fn);
   const f1 = (2 * precision * recall) / Math.max(1e-9, precision + recall);
 
-  // limpieza
+  // limpieza (NO eliminamos el modelo: se devuelve para predicciones posteriores)
   xTrain.dispose();
   yTrain.dispose();
   xTest.dispose();
   yTest.dispose();
-  model.dispose();
 
   return {
     history,
@@ -275,5 +306,6 @@ export async function trainModel(opts: {
     testCount: test.length,
     durationMs,
     epochs,
+    model,
   };
 }
