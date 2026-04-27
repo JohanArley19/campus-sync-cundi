@@ -860,9 +860,9 @@ function StudentPrediction({ model }: { model: tf.LayersModel }) {
         )}
 
         <Hint>
-          Esta predicción usa el mismo modelo recién entrenado y se calcula 100% en tu navegador. La
-          probabilidad combina los días que faltan, prioridad, carga actual del estudiante e
-          historial previo de cumplimiento.
+          La predicción utiliza el modelo recién entrenado y se calcula localmente en el navegador. La
+          probabilidad combina los días restantes hasta la entrega, la prioridad, la carga actual del
+          estudiante y su historial de cumplimiento.
         </Hint>
       </div>
     </Section>
