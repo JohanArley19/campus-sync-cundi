@@ -171,12 +171,28 @@ export default function Admin() {
     [students],
   );
 
+  // En riesgo: cualquier estudiante con vencidas, no_realizadas, o cumplimiento <60% (con al menos 1 actividad finalizada/vencida).
+  // Importante: estudiantes con 0% de cumplimiento Y casos resueltos/vencidos también deben aparecer.
   const atRisk = useMemo(
-    () =>
-      [...students]
-        .filter((s) => s.vencidas > 0 || (s.total_activities >= 3 && s.completion_pct < 50))
-        .sort((a, b) => b.vencidas - a.vencidas || a.completion_pct - b.completion_pct)
-        .slice(0, 5),
+    () => {
+      const hasResolvedCases = (s: typeof students[number]) =>
+        (s.realizadas + s.no_realizadas + s.vencidas) > 0;
+      return [...students]
+        .filter((s) => {
+          if (!hasResolvedCases(s)) return false; // ignora estudiantes sin actividad evaluable
+          if (s.vencidas > 0) return true;
+          if (s.no_realizadas > 0) return true;
+          if (s.completion_pct < 60) return true;
+          return false;
+        })
+        .sort(
+          (a, b) =>
+            b.vencidas - a.vencidas ||
+            b.no_realizadas - a.no_realizadas ||
+            a.completion_pct - b.completion_pct,
+        )
+        .slice(0, 8);
+    },
     [students],
   );
 
