@@ -535,7 +535,7 @@ export default function Admin() {
 
         <Panel
           title="Estudiantes en riesgo"
-          subtitle="Con vencidas o cumplimiento < 50%"
+          subtitle="Vencidas, no realizadas o cumplimiento < 60%"
           icon={<AlertTriangle className="h-4 w-4 text-destructive" />}
         >
           {atRisk.length === 0 ? (
@@ -544,19 +544,25 @@ export default function Admin() {
             </p>
           ) : (
             <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
-              {atRisk.map((s) => (
-                <li
-                  key={s.user_id}
-                  className="rounded-lg border border-destructive/20 bg-destructive/5 p-3"
-                >
-                  <p className="font-body text-sm font-semibold truncate">
-                    {s.display_name || "Estudiante"}
-                  </p>
-                  <p className="font-body text-[11px] text-muted-foreground mt-0.5">
-                    {s.vencidas} vencidas · cumplimiento {s.completion_pct}%
-                  </p>
-                </li>
-              ))}
+              {atRisk.map((s) => {
+                const parts: string[] = [];
+                if (s.vencidas > 0) parts.push(`${s.vencidas} vencida${s.vencidas === 1 ? "" : "s"}`);
+                if (s.no_realizadas > 0) parts.push(`${s.no_realizadas} no realizada${s.no_realizadas === 1 ? "" : "s"}`);
+                parts.push(`cumplimiento ${s.completion_pct}%`);
+                return (
+                  <li
+                    key={s.user_id}
+                    className="rounded-lg border border-destructive/20 bg-destructive/5 p-3"
+                  >
+                    <p className="font-body text-sm font-semibold truncate">
+                      {s.display_name || "Estudiante"}
+                    </p>
+                    <p className="font-body text-[11px] text-muted-foreground mt-0.5">
+                      {parts.join(" · ")}
+                    </p>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </Panel>
