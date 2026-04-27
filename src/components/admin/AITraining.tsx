@@ -128,9 +128,10 @@ export function AITraining() {
                   ¿Una actividad será entregada a tiempo?
                 </h2>
                 <p className="font-body text-sm text-muted-foreground mt-2 max-w-2xl">
-                  Entrenamos una <strong>red neuronal</strong> directamente en tu navegador con los datos
-                  reales del aplicativo. Aprende patrones para predecir si un estudiante completará una
-                  actividad — sin enviar nada a servidores externos.
+                  Una <strong>red neuronal</strong> se entrena en el navegador a partir de los datos
+                  registrados en el sistema para estimar la probabilidad de que un estudiante complete
+                  una actividad. El proceso se ejecuta de forma local, sin enviar información a
+                  servidores externos.
                 </p>
               </div>
             </div>
@@ -859,9 +860,9 @@ function StudentPrediction({ model }: { model: tf.LayersModel }) {
         )}
 
         <Hint>
-          Esta predicción usa el mismo modelo recién entrenado y se calcula 100% en tu navegador. La
-          probabilidad combina los días que faltan, prioridad, carga actual del estudiante e
-          historial previo de cumplimiento.
+          La predicción utiliza el modelo recién entrenado y se calcula localmente en el navegador. La
+          probabilidad combina los días restantes hasta la entrega, la prioridad, la carga actual del
+          estudiante y su historial de cumplimiento.
         </Hint>
       </div>
     </Section>
