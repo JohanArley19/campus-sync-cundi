@@ -171,12 +171,28 @@ export default function Admin() {
     [students],
   );
 
+  // En riesgo: cualquier estudiante con vencidas, no_realizadas, o cumplimiento <60% (con al menos 1 actividad finalizada/vencida).
+  // Importante: estudiantes con 0% de cumplimiento Y casos resueltos/vencidos también deben aparecer.
   const atRisk = useMemo(
-    () =>
-      [...students]
-        .filter((s) => s.vencidas > 0 || (s.total_activities >= 3 && s.completion_pct < 50))
-        .sort((a, b) => b.vencidas - a.vencidas || a.completion_pct - b.completion_pct)
-        .slice(0, 5),
+    () => {
+      const hasResolvedCases = (s: typeof students[number]) =>
+        (s.realizadas + s.no_realizadas + s.vencidas) > 0;
+      return [...students]
+        .filter((s) => {
+          if (!hasResolvedCases(s)) return false; // ignora estudiantes sin actividad evaluable
+          if (s.vencidas > 0) return true;
+          if (s.no_realizadas > 0) return true;
+          if (s.completion_pct < 60) return true;
+          return false;
+        })
+        .sort(
+          (a, b) =>
+            b.vencidas - a.vencidas ||
+            b.no_realizadas - a.no_realizadas ||
+            a.completion_pct - b.completion_pct,
+        )
+        .slice(0, 8);
+    },
     [students],
   );
 
@@ -519,7 +535,7 @@ export default function Admin() {
 
         <Panel
           title="Estudiantes en riesgo"
-          subtitle="Con vencidas o cumplimiento < 50%"
+          subtitle="Vencidas, no realizadas o cumplimiento < 60%"
           icon={<AlertTriangle className="h-4 w-4 text-destructive" />}
         >
           {atRisk.length === 0 ? (
@@ -528,19 +544,25 @@ export default function Admin() {
             </p>
           ) : (
             <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
-              {atRisk.map((s) => (
-                <li
-                  key={s.user_id}
-                  className="rounded-lg border border-destructive/20 bg-destructive/5 p-3"
-                >
-                  <p className="font-body text-sm font-semibold truncate">
-                    {s.display_name || "Estudiante"}
-                  </p>
-                  <p className="font-body text-[11px] text-muted-foreground mt-0.5">
-                    {s.vencidas} vencidas · cumplimiento {s.completion_pct}%
-                  </p>
-                </li>
-              ))}
+              {atRisk.map((s) => {
+                const parts: string[] = [];
+                if (s.vencidas > 0) parts.push(`${s.vencidas} vencida${s.vencidas === 1 ? "" : "s"}`);
+                if (s.no_realizadas > 0) parts.push(`${s.no_realizadas} no realizada${s.no_realizadas === 1 ? "" : "s"}`);
+                parts.push(`cumplimiento ${s.completion_pct}%`);
+                return (
+                  <li
+                    key={s.user_id}
+                    className="rounded-lg border border-destructive/20 bg-destructive/5 p-3"
+                  >
+                    <p className="font-body text-sm font-semibold truncate">
+                      {s.display_name || "Estudiante"}
+                    </p>
+                    <p className="font-body text-[11px] text-muted-foreground mt-0.5">
+                      {parts.join(" · ")}
+                    </p>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </Panel>
