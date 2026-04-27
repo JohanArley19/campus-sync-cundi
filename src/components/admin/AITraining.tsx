@@ -128,9 +128,10 @@ export function AITraining() {
                   ¿Una actividad será entregada a tiempo?
                 </h2>
                 <p className="font-body text-sm text-muted-foreground mt-2 max-w-2xl">
-                  Entrenamos una <strong>red neuronal</strong> directamente en tu navegador con los datos
-                  reales del aplicativo. Aprende patrones para predecir si un estudiante completará una
-                  actividad — sin enviar nada a servidores externos.
+                  Una <strong>red neuronal</strong> se entrena en el navegador a partir de los datos
+                  registrados en el sistema para estimar la probabilidad de que un estudiante complete
+                  una actividad. El proceso se ejecuta de forma local, sin enviar información a
+                  servidores externos.
                 </p>
               </div>
             </div>
