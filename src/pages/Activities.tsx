@@ -17,6 +17,8 @@ import {
   type Activity, type ActivityStatus, type ActivityPriority,
 } from "@/hooks/useActivities";
 import { useSubjects } from "@/hooks/useSubjects";
+import { useSemester } from "@/contexts/SemesterContext";
+import { subjectSemesterKey, formatSemester } from "@/lib/semester";
 import { STATUS_LABELS, PRIORITY_LABELS, formatDate, daysUntil } from "@/lib/academic";
 import { Plus, ListChecks, Pencil, Trash2, Sparkles, Loader2, AlertCircle, CheckCircle2, XCircle, Clock, Wand2 } from "lucide-react";
 import { toast } from "sonner";
@@ -57,9 +59,19 @@ const STATUS_INACTIVE_CLASSES: Record<ActivityStatus, string> = {
 export default function Activities() {
   const { data: activities = [], isLoading } = useActivities();
   const { data: subjects = [] } = useSubjects();
+  const { selected } = useSemester();
   const createActivity = useCreateActivity();
   const updateActivity = useUpdateActivity();
   const deleteActivity = useDeleteActivity();
+
+  const semesterSubjects = useMemo(
+    () => subjects.filter((s) => subjectSemesterKey(s) === selected),
+    [subjects, selected],
+  );
+  const semesterSubjectIds = useMemo(
+    () => new Set(semesterSubjects.map((s) => s.id)),
+    [semesterSubjects],
+  );
 
   const [filterStatus, setFilterStatus] = useState<ActivityStatus | "all">("all");
   const [filterSubject, setFilterSubject] = useState<string>("all");
@@ -80,21 +92,22 @@ export default function Activities() {
 
   const filtered = useMemo(() => {
     return activities.filter((a) => {
+      if (!semesterSubjectIds.has(a.subject_id)) return false;
       if (filterStatus !== "all" && a.status !== filterStatus) return false;
       if (filterSubject !== "all" && a.subject_id !== filterSubject) return false;
       return true;
     });
-  }, [activities, filterStatus, filterSubject]);
+  }, [activities, filterStatus, filterSubject, semesterSubjectIds]);
 
   const openNew = () => {
-    if (subjects.length === 0) {
-      toast.error("Primero debes crear al menos una materia");
+    if (semesterSubjects.length === 0) {
+      toast.error("Primero crea una materia en este semestre");
       return;
     }
     setEditing(null);
     setTitle("");
     setDescription("");
-    setSubjectId(subjects[0].id);
+    setSubjectId(semesterSubjects[0].id);
     setDueDate("");
     setStatus("pendiente");
     setPriority("media");
@@ -258,6 +271,10 @@ export default function Activities() {
       <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-4 animate-fade-in">
         {subjects.length === 0 ? (
           <EmptyNoSubjects />
+        ) : semesterSubjects.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground font-body">
+            No tienes materias en {formatSemester(selected)}. Cambia de semestre arriba o crea una materia para este periodo.
+          </div>
         ) : (
           <>
             {/* Filtros */}
@@ -279,7 +296,7 @@ export default function Activities() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas las materias</SelectItem>
-                  {subjects.map((s) => (
+                  {semesterSubjects.map((s) => (
                     <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                   ))}
                 </SelectContent>
@@ -452,7 +469,7 @@ export default function Activities() {
                   <SelectValue placeholder="Selecciona una materia" />
                 </SelectTrigger>
                 <SelectContent>
-                  {subjects.map((s) => (
+                  {semesterSubjects.map((s) => (
                     <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                   ))}
                 </SelectContent>

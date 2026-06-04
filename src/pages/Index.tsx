@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import SEOHead from "@/components/SEOHead";
 import { useActivities } from "@/hooks/useActivities";
 import { useSubjects } from "@/hooks/useSubjects";
+import { useSemester } from "@/contexts/SemesterContext";
+import { subjectSemesterKey } from "@/lib/semester";
 import { completionRate, daysUntil, STATUS_LABELS, PRIORITY_LABELS } from "@/lib/academic";
 import { BookOpen, ListChecks, AlertTriangle, CheckCircle2, ArrowRight, Sparkles } from "lucide-react";
 import { AIInsightsCard } from "@/components/dashboard/AIInsightsCard";
@@ -37,8 +39,19 @@ const PRIORITY_COLORS = {
 };
 
 export default function Index() {
-  const { data: activities = [], isLoading: actLoading } = useActivities();
-  const { data: subjects = [], isLoading: subLoading } = useSubjects();
+  const { data: allActivities = [], isLoading: actLoading } = useActivities();
+  const { data: allSubjects = [], isLoading: subLoading } = useSubjects();
+  const { selected } = useSemester();
+
+  const subjects = useMemo(
+    () => allSubjects.filter((s) => subjectSemesterKey(s) === selected),
+    [allSubjects, selected],
+  );
+  const subjectIds = useMemo(() => new Set(subjects.map((s) => s.id)), [subjects]);
+  const activities = useMemo(
+    () => allActivities.filter((a) => subjectIds.has(a.subject_id)),
+    [allActivities, subjectIds],
+  );
 
   const stats = useMemo(() => {
     const total = activities.length;
@@ -83,7 +96,7 @@ export default function Index() {
     return { total, pendientes, realizadas, noRealizadas, cumplimiento, proximas, statusData, priorityData, subjectData };
   }, [activities, subjects]);
 
-  const isEmpty = !actLoading && !subLoading && subjects.length === 0;
+  const isEmpty = !actLoading && !subLoading && allSubjects.length === 0;
 
   return (
     <AppShell title="Dashboard" subtitle="Resumen de tu actividad académica">

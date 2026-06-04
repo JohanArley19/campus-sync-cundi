@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useSubjects, useCreateSubject, useUpdateSubject, useDeleteSubject, type Subject } from "@/hooks/useSubjects";
 import { useActivities } from "@/hooks/useActivities";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useSemester } from "@/contexts/SemesterContext";
+import { generateSemesterOptions, formatSemester, subjectSemesterKey, currentSemester, NO_SEMESTER } from "@/lib/semester";
 import { SUBJECT_COLORS } from "@/lib/academic";
 import { Plus, BookOpen, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -24,9 +27,26 @@ import SEOHead from "@/components/SEOHead";
 export default function Subjects() {
   const { data: subjects = [], isLoading } = useSubjects();
   const { data: activities = [] } = useActivities();
+  const { selected } = useSemester();
   const createSubject = useCreateSubject();
   const updateSubject = useUpdateSubject();
   const deleteSubject = useDeleteSubject();
+
+  const visibleSubjects = useMemo(
+    () => subjects.filter((s) => subjectSemesterKey(s) === selected),
+    [subjects, selected],
+  );
+
+  const semesterOptions = useMemo(() => {
+    const opts = generateSemesterOptions();
+    // Incluye valores legacy (texto libre) que ya existan en las materias.
+    subjects.forEach((s) => {
+      if (s.semester && s.semester.trim() && !opts.includes(s.semester)) {
+        opts.push(s.semester);
+      }
+    });
+    return opts;
+  }, [subjects]);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Subject | null>(null);
@@ -41,7 +61,7 @@ export default function Subjects() {
     setEditing(null);
     setName("");
     setCode("");
-    setSemester("");
+    setSemester(selected && selected !== NO_SEMESTER ? selected : currentSemester());
     setColor(SUBJECT_COLORS[subjects.length % SUBJECT_COLORS.length]);
     setDialogOpen(true);
   };
@@ -114,9 +134,25 @@ export default function Subjects() {
           <p className="text-center text-muted-foreground py-12 font-body text-sm">Cargando…</p>
         ) : subjects.length === 0 ? (
           <EmptySubjects onAdd={openNew} />
+        ) : visibleSubjects.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-border bg-card p-10 text-center max-w-xl mx-auto">
+            <div className="h-12 w-12 rounded-full bg-primary-soft mx-auto flex items-center justify-center mb-4">
+              <BookOpen className="h-6 w-6 text-primary" />
+            </div>
+            <h2 className="font-display text-lg font-bold text-foreground mb-1">
+              Sin materias en {formatSemester(selected)}
+            </h2>
+            <p className="text-muted-foreground text-sm mb-5">
+              No tienes materias registradas en este semestre. Crea una nueva o cambia de semestre arriba.
+            </p>
+            <Button onClick={openNew} className="font-body">
+              <Plus className="h-4 w-4 mr-1.5" />
+              Nueva materia
+            </Button>
+          </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {subjects.map((s) => {
+            {visibleSubjects.map((s) => {
               const count = activities.filter((a) => a.subject_id === s.id).length;
               const pendingCount = activities.filter((a) => a.subject_id === s.id && a.status === "pendiente").length;
               return (
@@ -189,7 +225,16 @@ export default function Subjects() {
               </div>
               <div className="space-y-1.5">
                 <Label className="font-body text-xs">Semestre</Label>
-                <Input value={semester} onChange={(e) => setSemester(e.target.value)} placeholder="2026-1" />
+                <Select value={semester} onValueChange={setSemester}>
+                  <SelectTrigger className="font-body text-sm">
+                    <SelectValue placeholder="Selecciona" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {semesterOptions.map((s) => (
+                      <SelectItem key={s} value={s}>{formatSemester(s)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="space-y-2">
