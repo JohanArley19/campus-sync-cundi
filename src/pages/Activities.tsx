@@ -469,7 +469,7 @@ export default function Activities() {
                   <SelectValue placeholder="Selecciona una materia" />
                 </SelectTrigger>
                 <SelectContent>
-                  {subjects.map((s) => (
+                  {semesterSubjects.map((s) => (
                     <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                   ))}
                 </SelectContent>
