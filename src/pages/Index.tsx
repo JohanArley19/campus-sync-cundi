@@ -39,8 +39,19 @@ const PRIORITY_COLORS = {
 };
 
 export default function Index() {
-  const { data: activities = [], isLoading: actLoading } = useActivities();
-  const { data: subjects = [], isLoading: subLoading } = useSubjects();
+  const { data: allActivities = [], isLoading: actLoading } = useActivities();
+  const { data: allSubjects = [], isLoading: subLoading } = useSubjects();
+  const { selected } = useSemester();
+
+  const subjects = useMemo(
+    () => allSubjects.filter((s) => subjectSemesterKey(s) === selected),
+    [allSubjects, selected],
+  );
+  const subjectIds = useMemo(() => new Set(subjects.map((s) => s.id)), [subjects]);
+  const activities = useMemo(
+    () => allActivities.filter((a) => subjectIds.has(a.subject_id)),
+    [allActivities, subjectIds],
+  );
 
   const stats = useMemo(() => {
     const total = activities.length;
