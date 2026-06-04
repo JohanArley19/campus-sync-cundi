@@ -134,9 +134,25 @@ export default function Subjects() {
           <p className="text-center text-muted-foreground py-12 font-body text-sm">Cargando…</p>
         ) : subjects.length === 0 ? (
           <EmptySubjects onAdd={openNew} />
+        ) : visibleSubjects.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-border bg-card p-10 text-center max-w-xl mx-auto">
+            <div className="h-12 w-12 rounded-full bg-primary-soft mx-auto flex items-center justify-center mb-4">
+              <BookOpen className="h-6 w-6 text-primary" />
+            </div>
+            <h2 className="font-display text-lg font-bold text-foreground mb-1">
+              Sin materias en {formatSemester(selected)}
+            </h2>
+            <p className="text-muted-foreground text-sm mb-5">
+              No tienes materias registradas en este semestre. Crea una nueva o cambia de semestre arriba.
+            </p>
+            <Button onClick={openNew} className="font-body">
+              <Plus className="h-4 w-4 mr-1.5" />
+              Nueva materia
+            </Button>
+          </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {subjects.map((s) => {
+            {visibleSubjects.map((s) => {
               const count = activities.filter((a) => a.subject_id === s.id).length;
               const pendingCount = activities.filter((a) => a.subject_id === s.id && a.status === "pendiente").length;
               return (
