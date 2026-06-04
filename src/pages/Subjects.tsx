@@ -61,7 +61,7 @@ export default function Subjects() {
     setEditing(null);
     setName("");
     setCode("");
-    setSemester("");
+    setSemester(selected && selected !== NO_SEMESTER ? selected : currentSemester());
     setColor(SUBJECT_COLORS[subjects.length % SUBJECT_COLORS.length]);
     setDialogOpen(true);
   };
