@@ -271,6 +271,10 @@ export default function Activities() {
       <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-4 animate-fade-in">
         {subjects.length === 0 ? (
           <EmptyNoSubjects />
+        ) : semesterSubjects.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground font-body">
+            No tienes materias en {formatSemester(selected)}. Cambia de semestre arriba o crea una materia para este periodo.
+          </div>
         ) : (
           <>
             {/* Filtros */}
