@@ -96,7 +96,7 @@ export default function Index() {
     return { total, pendientes, realizadas, noRealizadas, cumplimiento, proximas, statusData, priorityData, subjectData };
   }, [activities, subjects]);
 
-  const isEmpty = !actLoading && !subLoading && subjects.length === 0;
+  const isEmpty = !actLoading && !subLoading && allSubjects.length === 0;
 
   return (
     <AppShell title="Dashboard" subtitle="Resumen de tu actividad académica">
