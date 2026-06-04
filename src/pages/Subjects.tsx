@@ -27,9 +27,26 @@ import SEOHead from "@/components/SEOHead";
 export default function Subjects() {
   const { data: subjects = [], isLoading } = useSubjects();
   const { data: activities = [] } = useActivities();
+  const { selected } = useSemester();
   const createSubject = useCreateSubject();
   const updateSubject = useUpdateSubject();
   const deleteSubject = useDeleteSubject();
+
+  const visibleSubjects = useMemo(
+    () => subjects.filter((s) => subjectSemesterKey(s) === selected),
+    [subjects, selected],
+  );
+
+  const semesterOptions = useMemo(() => {
+    const opts = generateSemesterOptions();
+    // Incluye valores legacy (texto libre) que ya existan en las materias.
+    subjects.forEach((s) => {
+      if (s.semester && s.semester.trim() && !opts.includes(s.semester)) {
+        opts.push(s.semester);
+      }
+    });
+    return opts;
+  }, [subjects]);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Subject | null>(null);
