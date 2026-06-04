@@ -225,7 +225,16 @@ export default function Subjects() {
               </div>
               <div className="space-y-1.5">
                 <Label className="font-body text-xs">Semestre</Label>
-                <Input value={semester} onChange={(e) => setSemester(e.target.value)} placeholder="2026-1" />
+                <Select value={semester} onValueChange={setSemester}>
+                  <SelectTrigger className="font-body text-sm">
+                    <SelectValue placeholder="Selecciona" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {semesterOptions.map((s) => (
+                      <SelectItem key={s} value={s}>{formatSemester(s)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="space-y-2">
