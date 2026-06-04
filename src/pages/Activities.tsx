@@ -92,21 +92,22 @@ export default function Activities() {
 
   const filtered = useMemo(() => {
     return activities.filter((a) => {
+      if (!semesterSubjectIds.has(a.subject_id)) return false;
       if (filterStatus !== "all" && a.status !== filterStatus) return false;
       if (filterSubject !== "all" && a.subject_id !== filterSubject) return false;
       return true;
     });
-  }, [activities, filterStatus, filterSubject]);
+  }, [activities, filterStatus, filterSubject, semesterSubjectIds]);
 
   const openNew = () => {
-    if (subjects.length === 0) {
-      toast.error("Primero debes crear al menos una materia");
+    if (semesterSubjects.length === 0) {
+      toast.error("Primero crea una materia en este semestre");
       return;
     }
     setEditing(null);
     setTitle("");
     setDescription("");
-    setSubjectId(subjects[0].id);
+    setSubjectId(semesterSubjects[0].id);
     setDueDate("");
     setStatus("pendiente");
     setPriority("media");
