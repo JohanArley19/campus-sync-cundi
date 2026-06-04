@@ -59,9 +59,19 @@ const STATUS_INACTIVE_CLASSES: Record<ActivityStatus, string> = {
 export default function Activities() {
   const { data: activities = [], isLoading } = useActivities();
   const { data: subjects = [] } = useSubjects();
+  const { selected } = useSemester();
   const createActivity = useCreateActivity();
   const updateActivity = useUpdateActivity();
   const deleteActivity = useDeleteActivity();
+
+  const semesterSubjects = useMemo(
+    () => subjects.filter((s) => subjectSemesterKey(s) === selected),
+    [subjects, selected],
+  );
+  const semesterSubjectIds = useMemo(
+    () => new Set(semesterSubjects.map((s) => s.id)),
+    [semesterSubjects],
+  );
 
   const [filterStatus, setFilterStatus] = useState<ActivityStatus | "all">("all");
   const [filterSubject, setFilterSubject] = useState<string>("all");
