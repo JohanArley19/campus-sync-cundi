@@ -296,7 +296,7 @@ export default function Activities() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas las materias</SelectItem>
-                  {subjects.map((s) => (
+                  {semesterSubjects.map((s) => (
                     <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                   ))}
                 </SelectContent>
