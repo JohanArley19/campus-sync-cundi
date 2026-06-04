@@ -17,6 +17,8 @@ import {
   type Activity, type ActivityStatus, type ActivityPriority,
 } from "@/hooks/useActivities";
 import { useSubjects } from "@/hooks/useSubjects";
+import { useSemester } from "@/contexts/SemesterContext";
+import { subjectSemesterKey, formatSemester } from "@/lib/semester";
 import { STATUS_LABELS, PRIORITY_LABELS, formatDate, daysUntil } from "@/lib/academic";
 import { Plus, ListChecks, Pencil, Trash2, Sparkles, Loader2, AlertCircle, CheckCircle2, XCircle, Clock, Wand2 } from "lucide-react";
 import { toast } from "sonner";
