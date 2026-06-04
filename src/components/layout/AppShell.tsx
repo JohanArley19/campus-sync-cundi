@@ -1,6 +1,7 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { SemesterSelector } from "@/components/layout/SemesterSelector";
 import { useEnsureDailyNotifications } from "@/hooks/useNotifications";
 import { ReactNode } from "react";
 
@@ -33,6 +34,7 @@ export function AppShell({ title, subtitle, actions, children }: AppShellProps) 
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
+              <SemesterSelector />
               {actions}
               <NotificationBell />
             </div>
