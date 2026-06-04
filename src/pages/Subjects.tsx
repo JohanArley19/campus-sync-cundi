@@ -16,6 +16,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useSubjects, useCreateSubject, useUpdateSubject, useDeleteSubject, type Subject } from "@/hooks/useSubjects";
 import { useActivities } from "@/hooks/useActivities";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useSemester } from "@/contexts/SemesterContext";
+import { generateSemesterOptions, formatSemester, subjectSemesterKey, currentSemester, NO_SEMESTER } from "@/lib/semester";
 import { SUBJECT_COLORS } from "@/lib/academic";
 import { Plus, BookOpen, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
