@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import SEOHead from "@/components/SEOHead";
 import { useActivities } from "@/hooks/useActivities";
 import { useSubjects } from "@/hooks/useSubjects";
+import { useSemester } from "@/contexts/SemesterContext";
+import { subjectSemesterKey } from "@/lib/semester";
 import { completionRate, daysUntil, STATUS_LABELS, PRIORITY_LABELS } from "@/lib/academic";
 import { BookOpen, ListChecks, AlertTriangle, CheckCircle2, ArrowRight, Sparkles } from "lucide-react";
 import { AIInsightsCard } from "@/components/dashboard/AIInsightsCard";
