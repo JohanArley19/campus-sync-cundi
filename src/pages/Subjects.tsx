@@ -83,6 +83,11 @@ export default function Subjects() {
       toast.error("El nombre es obligatorio");
       return;
     }
+    const creditsValue = credits.trim() === "" ? null : Number(credits);
+    if (creditsValue !== null && (Number.isNaN(creditsValue) || creditsValue < 0)) {
+      toast.error("Los créditos deben ser un número válido");
+      return;
+    }
     try {
       if (editing) {
         await updateSubject.mutateAsync({
@@ -90,6 +95,7 @@ export default function Subjects() {
           name: name.trim(),
           code: code.trim() || null,
           semester: semester.trim() || null,
+          credits: creditsValue,
           color,
         });
         toast.success("Materia actualizada");
@@ -98,6 +104,7 @@ export default function Subjects() {
           name: name.trim(),
           code: code.trim() || null,
           semester: semester.trim() || null,
+          credits: creditsValue,
           color,
         });
         toast.success("Materia creada");
