@@ -247,6 +247,16 @@ export default function Subjects() {
                 </Select>
               </div>
             </div>
+            <div className="space-y-1.5">
+              <Label className="font-body text-xs">Créditos</Label>
+              <Input
+                type="number"
+                min={0}
+                value={credits}
+                onChange={(e) => setCredits(e.target.value)}
+                placeholder="3"
+              />
+            </div>
             <div className="space-y-2">
               <Label className="font-body text-xs">Color</Label>
               <div className="flex gap-2 flex-wrap">
