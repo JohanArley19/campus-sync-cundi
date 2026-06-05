@@ -24,6 +24,7 @@ export type Database = {
           created_at: string
           description: string | null
           due_date: string | null
+          grade: number | null
           id: string
           priority: Database["public"]["Enums"]["activity_priority"]
           status: Database["public"]["Enums"]["activity_status"]
@@ -31,6 +32,7 @@ export type Database = {
           title: string
           updated_at: string
           user_id: string
+          weight: number | null
         }
         Insert: {
           ai_analyzed_at?: string | null
@@ -41,6 +43,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           due_date?: string | null
+          grade?: number | null
           id?: string
           priority?: Database["public"]["Enums"]["activity_priority"]
           status?: Database["public"]["Enums"]["activity_status"]
@@ -48,6 +51,7 @@ export type Database = {
           title: string
           updated_at?: string
           user_id: string
+          weight?: number | null
         }
         Update: {
           ai_analyzed_at?: string | null
@@ -58,6 +62,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           due_date?: string | null
+          grade?: number | null
           id?: string
           priority?: Database["public"]["Enums"]["activity_priority"]
           status?: Database["public"]["Enums"]["activity_status"]
@@ -65,6 +70,7 @@ export type Database = {
           title?: string
           updated_at?: string
           user_id?: string
+          weight?: number | null
         }
         Relationships: [
           {
@@ -221,6 +227,7 @@ export type Database = {
           code: string | null
           color: string
           created_at: string
+          credits: number | null
           id: string
           name: string
           semester: string | null
@@ -231,6 +238,7 @@ export type Database = {
           code?: string | null
           color?: string
           created_at?: string
+          credits?: number | null
           id?: string
           name: string
           semester?: string | null
@@ -241,6 +249,7 @@ export type Database = {
           code?: string | null
           color?: string
           created_at?: string
+          credits?: number | null
           id?: string
           name?: string
           semester?: string | null

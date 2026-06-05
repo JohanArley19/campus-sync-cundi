@@ -16,6 +16,9 @@ import ResetPassword from "./pages/ResetPassword";
 import Landing from "./pages/Landing";
 import Subjects from "./pages/Subjects";
 import Activities from "./pages/Activities";
+import CalendarPage from "./pages/Calendar";
+import Grades from "./pages/Grades";
+import Progress from "./pages/Progress";
 import Assistant from "./pages/Assistant";
 import Admin from "./pages/Admin";
 import AdminStudent from "./pages/AdminStudent";
@@ -58,6 +61,30 @@ const App = () => (
               element={
                 <StudentRoute>
                   <Activities />
+                </StudentRoute>
+              }
+            />
+            <Route
+              path="/app/calendario"
+              element={
+                <StudentRoute>
+                  <CalendarPage />
+                </StudentRoute>
+              }
+            />
+            <Route
+              path="/app/notas"
+              element={
+                <StudentRoute>
+                  <Grades />
+                </StudentRoute>
+              }
+            />
+            <Route
+              path="/app/progreso"
+              element={
+                <StudentRoute>
+                  <Progress />
                 </StudentRoute>
               }
             />

@@ -55,6 +55,7 @@ export default function Subjects() {
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
   const [semester, setSemester] = useState("");
+  const [credits, setCredits] = useState("");
   const [color, setColor] = useState(SUBJECT_COLORS[0]);
 
   const openNew = () => {
@@ -62,6 +63,7 @@ export default function Subjects() {
     setName("");
     setCode("");
     setSemester(selected && selected !== NO_SEMESTER ? selected : currentSemester());
+    setCredits("");
     setColor(SUBJECT_COLORS[subjects.length % SUBJECT_COLORS.length]);
     setDialogOpen(true);
   };
@@ -71,6 +73,7 @@ export default function Subjects() {
     setName(s.name);
     setCode(s.code ?? "");
     setSemester(s.semester ?? "");
+    setCredits(s.credits != null ? String(s.credits) : "");
     setColor(s.color);
     setDialogOpen(true);
   };
@@ -80,6 +83,11 @@ export default function Subjects() {
       toast.error("El nombre es obligatorio");
       return;
     }
+    const creditsValue = credits.trim() === "" ? null : Number(credits);
+    if (creditsValue !== null && (Number.isNaN(creditsValue) || creditsValue < 0)) {
+      toast.error("Los créditos deben ser un número válido");
+      return;
+    }
     try {
       if (editing) {
         await updateSubject.mutateAsync({
@@ -87,6 +95,7 @@ export default function Subjects() {
           name: name.trim(),
           code: code.trim() || null,
           semester: semester.trim() || null,
+          credits: creditsValue,
           color,
         });
         toast.success("Materia actualizada");
@@ -95,6 +104,7 @@ export default function Subjects() {
           name: name.trim(),
           code: code.trim() || null,
           semester: semester.trim() || null,
+          credits: creditsValue,
           color,
         });
         toast.success("Materia creada");
@@ -236,6 +246,16 @@ export default function Subjects() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="font-body text-xs">Créditos</Label>
+              <Input
+                type="number"
+                min={0}
+                value={credits}
+                onChange={(e) => setCredits(e.target.value)}
+                placeholder="3"
+              />
             </div>
             <div className="space-y-2">
               <Label className="font-body text-xs">Color</Label>

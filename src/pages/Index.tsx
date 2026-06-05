@@ -11,6 +11,7 @@ import { completionRate, daysUntil, STATUS_LABELS, PRIORITY_LABELS } from "@/lib
 import { BookOpen, ListChecks, AlertTriangle, CheckCircle2, ArrowRight, Sparkles } from "lucide-react";
 import { AIInsightsCard } from "@/components/dashboard/AIInsightsCard";
 import { PromoteAdminButton } from "@/components/admin/PromoteAdminButton";
+import { CloseSemesterButton } from "@/components/semester/CloseSemesterButton";
 import {
   PieChart,
   Pie,
@@ -99,7 +100,11 @@ export default function Index() {
   const isEmpty = !actLoading && !subLoading && allSubjects.length === 0;
 
   return (
-    <AppShell title="Dashboard" subtitle="Resumen de tu actividad académica">
+    <AppShell
+      title="Dashboard"
+      subtitle="Resumen de tu actividad académica"
+      actions={!isEmpty ? <CloseSemesterButton /> : undefined}
+    >
       <SEOHead title="Dashboard — CampusSync" description="Visualiza tus métricas académicas en CampusSync." />
 
       <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6 animate-fade-in">
