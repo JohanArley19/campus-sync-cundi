@@ -55,6 +55,7 @@ export default function Subjects() {
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
   const [semester, setSemester] = useState("");
+  const [credits, setCredits] = useState("");
   const [color, setColor] = useState(SUBJECT_COLORS[0]);
 
   const openNew = () => {
