@@ -65,6 +65,30 @@ const App = () => (
               }
             />
             <Route
+              path="/app/calendario"
+              element={
+                <StudentRoute>
+                  <CalendarPage />
+                </StudentRoute>
+              }
+            />
+            <Route
+              path="/app/notas"
+              element={
+                <StudentRoute>
+                  <Grades />
+                </StudentRoute>
+              }
+            />
+            <Route
+              path="/app/progreso"
+              element={
+                <StudentRoute>
+                  <Progress />
+                </StudentRoute>
+              }
+            />
+            <Route
               path="/app/asistente"
               element={
                 <StudentRoute>
