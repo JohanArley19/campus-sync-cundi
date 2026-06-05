@@ -11,6 +11,7 @@ import { completionRate, daysUntil, STATUS_LABELS, PRIORITY_LABELS } from "@/lib
 import { BookOpen, ListChecks, AlertTriangle, CheckCircle2, ArrowRight, Sparkles } from "lucide-react";
 import { AIInsightsCard } from "@/components/dashboard/AIInsightsCard";
 import { PromoteAdminButton } from "@/components/admin/PromoteAdminButton";
+import { CloseSemesterButton } from "@/components/semester/CloseSemesterButton";
 import {
   PieChart,
   Pie,
