@@ -63,6 +63,7 @@ export default function Subjects() {
     setName("");
     setCode("");
     setSemester(selected && selected !== NO_SEMESTER ? selected : currentSemester());
+    setCredits("");
     setColor(SUBJECT_COLORS[subjects.length % SUBJECT_COLORS.length]);
     setDialogOpen(true);
   };
@@ -72,6 +73,7 @@ export default function Subjects() {
     setName(s.name);
     setCode(s.code ?? "");
     setSemester(s.semester ?? "");
+    setCredits(s.credits != null ? String(s.credits) : "");
     setColor(s.color);
     setDialogOpen(true);
   };
